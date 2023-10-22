@@ -85,13 +85,13 @@
 ; x = 17
 ; coinset = [4 9 14 15 16 25]
 
-; solution
+;; what do i need to do to find a solution?
 
 ; 1. reverse the vector order
 
 ; (reverse coinset)
 
-; 2. only keep coins that are less than or equal to x.
+; 2. only keep coins that are less than or equal to x. (optional? could deal with this during recursion)
 
 (defn coins-equal-or-less [x coinset]
   (filter #(< % x) coinset))
@@ -165,7 +165,10 @@ coinset = [4 9 14 15 16 25]
           small-coll (rest initial-coll)]
 
       (recur small-coll incd-coll))))
+
 ;; => [2 3 4 5]
+
+;; SUCCESS!
 
 ;;;;;;;;  RETURN COLL OF ONLY ODD NUMBERS
 
@@ -183,9 +186,11 @@ coinset = [4 9 14 15 16 25]
           odd-coll (conj new-coll odd-dude)
           small-coll (rest init-coll)]
 
-      (recur small-coll odd-coll))))
+      (recur small-coll odd-coll)))) 
 
 ;; => [1 nil 3 nil 5 nil 7 nil]
+
+;; FAIL
 
 ;; Bah, frickin nils...frickin NILS!
 
@@ -214,8 +219,11 @@ coinset = [4 9 14 15 16 25]
                               result)]
                new-coll)
          
-             (rest remaining))))) ;; => [1 3 5 7]
+             (rest remaining))))) 
 
+;; => [1 3 5 7]
+
+;; SUCCESS!
 
 ;;;;;;;;;  INCREMENT ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
 
@@ -244,6 +252,8 @@ coinset = [4 9 14 15 16 25]
 (inc-the-evens simple-vector)
 
 ;; => [3 91 23 79 91 21 11 57]
+
+;; FAIL
 
 ; Oops! I changed the shape of the data and threw out the odds.
 ; Re-read the problem!
@@ -278,7 +288,9 @@ coinset = [4 9 14 15 16 25]
 
 ;; => [3 3 5 5 7 7]
 
-;; no nils, baby!
+;; SUCCESS!
+
+;  no nils, baby!
 
 
 ;;;;;;;;;;   RECURSION ON SIMPLER NESTED COLL
@@ -315,7 +327,11 @@ coinset = [4 9 14 15 16 25]
            new-coll) ; current new-coll
          (rest remaining))))))  ; current remaining, without the first item
 
-(nest-inspector-dep simpler-vector) ;; => [1 202 53 7]
+(nest-inspector-dep simpler-vector) 
+
+;; => [1 202 53 7]
+
+;; FAIL
 
 ; repl output:
 
@@ -370,9 +386,11 @@ coinset = [4 9 14 15 16 25]
            new-coll) ; current new-coll
          (rest remaining))))))  ; current remaining, without the first item
 
-(nest-inspector simpler-vector) ;; => [1 202 [53 466] 7]
+(nest-inspector simpler-vector) 
 
-;; SUCCESS! WOOOO!
+;; => [1 202 [53 466] 7]
+
+;; SUCCESS!
 
 ; REPL OUTPUT
 
@@ -389,18 +407,82 @@ coinset = [4 9 14 15 16 25]
 ; "first-item: 7"
 ; "new-coll: [1 202 [53 466] 7]"
 
-; Look at nest-inspector -  go line by line
+(def simple-vector [2 3 5 [90 13 15 7 [22 21 3389 78 90]] [20 21 23] 9 10 45 56])
 
-; every time i do something, say what i am doing with the result of that thing.
+(nest-inspector simple-vector)
 
-; for example, what are you doing with the result of let?  im returning it as the val of my fn
+;; => [2 3 5 [90 13 15 7 [22 21 3389 78 90]] [20 21 23] 9 10 45 56]
 
-; imagine each fn is replaced with its value. what are you doing with that value?
-
-; be vigilant of what im actually doing vs what i want to be doing = this is where bugs live
+;; SUCCESS!
 
 (comment 
+
+;; Analyze nest-inspector line by line.
+
+; - every time i do something, say what i am doing with the result of that thing.
+
+; - for example, what are you doing with the result of let?  im returning it as the val of my fn
+
+; - imagine each fn is replaced with its value. what are you doing with that value?
+
+;-  be vigilant of what im actually doing vs what i want to be doing = this is where bugs live
 
 (prn "------START OVER------")
 
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; What do you have? 
+
+; - target x
+
+; - ascending coinset
+
+;; What is the goal?
+
+; - Return a map such that each key is the coin, and each value is the number of times you need that coin. 
+
+; - If x = 17 and coinset = [4 9 14 25], possible solutions are {:4 2, :9 1, :14 0, :25 0}
+
+;; What information do I need to accomplish / what do I want?
+
+; - My coinset is sorted. (notes say it is)
+
+; - How is my coinset sorted? I want it descending so I fetch largest coins first. (reverse coinset)
+
+; - How many times does the first coin of the sorted coinset go into the target?  (quot target coin); {coin (quot target coin)}
+
+; - I need to know the remainder of original target and first coin of sorted coinset. result of (rem target coin) will be our new target for next coin.
+
+; - How many times does the first coin of the sorted coinset go into the target? 
+
+; - Does the target currently equal 0?
+
+; - Is the sorted coinset empty?
+
+;; What should we do when the following cases are true?
+
+; - Target = 0, Remaining = empty ; I'm done - Return result
+
+; - Target = 0, Remaining = not empty ; I'm done - Return result
+
+; - Target = not 0, Remaining = not empty ; Keep going - Return target - keep processing like "normal"
+
+; - Target = not 0, Remaining = empty ; Keep going but with extra work :
+
+; -------------------------------------  In the result so far, dec the val of largest key with a non-0 val. This is now your new result.
+
+; -------------------------------------  Start over with new result as described above, remaining as coll not including other coins in result, target as original
+
+(comment
+
+(let [initial []
+      target x
+      coll coinset]
+
+  (loop [result initial
+         remaining coll]))
+
+)
+
