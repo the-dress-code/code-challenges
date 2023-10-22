@@ -202,24 +202,27 @@ coinset = [4 9 14 15 16 25]
 
 ;;;;;;;;;  RETURN COLL OF ONLY ODD NUMBERS, DONT LET THE NILS IN, DO IT RIGHT, NO NIL FILTERING
 
+(defn only-odds [x]
 
-(let [coll [1 2 3 4 5 6 7 8]
-      initial []]
+  (let [coll x
+        initial []]
 
-  (loop [result initial
-         remaining coll]
+    (loop [result initial
+           remaining coll]
 
-    (if (empty? remaining)
+      (if (empty? remaining)
 
-      result
+        result
 
-      (recur (let [first-item (first remaining)
-                   new-coll (if (odd? first-item)
-                              (conj result first-item)
-                              result)]
-               new-coll)
-         
-             (rest remaining))))) 
+        (recur (let [first-item (first remaining)
+                     new-coll (if (odd? first-item)
+                                (conj result first-item)
+                                result)]
+                 new-coll)
+               
+               (rest remaining)))))) 
+
+(only-odds [1 2 3 4 5 6 7 8])
 
 ;; => [1 3 5 7]
 
@@ -229,7 +232,7 @@ coinset = [4 9 14 15 16 25]
 
 (def simple-vector [2 3 5 [90 13 15 7 [22 21 3389 78 90]] [20 21 23] 9 10 45 56])
 
-(defn inc-the-evens [x]
+(defn inc-the-evens-dep [x]
 
   (let [initial []
         coll (flatten x)]
@@ -249,7 +252,7 @@ coinset = [4 9 14 15 16 25]
                
                (rest remaining))))))
 
-(inc-the-evens simple-vector)
+(inc-the-evens-dep simple-vector)
 
 ;; => [3 91 23 79 91 21 11 57]
 
@@ -355,7 +358,7 @@ coinset = [4 9 14 15 16 25]
 ;; A: call the fn on itself! - how will we know when to move on? inner coll is empty, just like with outer coll.
 
 
-;;;;;;;;;;; USE RECURSION ON SIMPLER NESTED COLLECTION
+;;;;;;;;;;; USE RECURSION ON SIMPLER NESTED COLLECTION (NO INC)
 
 (def simpler-vector [1 202 [53 466] 7])
 
