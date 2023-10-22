@@ -338,6 +338,9 @@ coinset = [4 9 14 15 16 25]
 
 ;; A: call the fn on itself! - how will we know when to move on? inner coll is empty, just like with outer coll.
 
+
+;;;;;;;;;;; USE RECURSION ON SIMPLER NESTED COLLECTION
+
 (def simpler-vector [1 202 [53 466] 7])
 
 (defn nest-inspector [x]
@@ -368,6 +371,21 @@ coinset = [4 9 14 15 16 25]
          (rest remaining))))))  ; current remaining, without the first item
 
 (nest-inspector simpler-vector) ;; => [1 202 [53 466] 7]
+
+; REPL OUTPUT
+
+; "first-item: 1"
+; "new-coll: [1]"
+; "first-item: 202"
+; "new-coll: [1 202]"
+; "first-item: [53 466]"
+; "first-item: 53"
+; "new-coll: [53]"
+; "first-item: 466"
+; "new-coll: [53 466]"
+; "new-coll: [1 202 [53 466]]"
+; "first-item: 7"
+; "new-coll: [1 202 [53 466] 7]"
 
 ; Look at nest-inspector -  go line by line
 
