@@ -372,6 +372,8 @@ coinset = [4 9 14 15 16 25]
 
 (nest-inspector simpler-vector) ;; => [1 202 [53 466] 7]
 
+;; SUCCESS! WOOOO!
+
 ; REPL OUTPUT
 
 ; "first-item: 1"
