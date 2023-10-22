@@ -418,6 +418,78 @@ coinset = [4 9 14 15 16 25]
 
 ;; SUCCESS!
 
+; now go back and try again:
+
+;;;;;;;;;  INC ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
+
+; step 1 process the nest
+
+(defn process-nest [x]
+
+  (let [initial []
+        coll x]
+
+    (loop [result initial
+           remaining coll]
+
+      (if (empty? remaining)
+
+        result
+
+        (recur
+
+         (let [first-item (first remaining)
+               new-coll (if (coll? first-item)
+                          (conj result (process-nest first-item))
+                          (conj result first-item))]
+           new-coll)
+
+         (rest remaining ))))))
+
+(process-nest [1 2 3 [4 5] 6]) ;; => [1 2 3 [4 5] 6]
+
+; step 2, insert the work to check if first-item is even. inc if even, otherwise, give me first-item.
+
+(defn inc-the-evens [x]
+
+  (let [initial []
+        coll x]
+
+    (loop [result initial
+           remaining coll]
+
+      (if (empty? remaining)
+
+        result
+
+        (recur
+
+         (let [first-item (first remaining)
+               new-coll (if (coll? first-item)
+                          (conj result (inc-the-evens first-item))
+                          (conj result 
+                                (if (even? first-item)
+                                  (conj result (inc first-item))
+                                  result)))]
+           new-coll)
+
+         (rest remaining ))))))
+
+(inc-the-evens [1 2 3 [4 5] 6])
+;; => [[]
+;;     [[] 3]
+;;     [[] [[] 3]]
+;;     [[5] [[5]]]
+;;     [[] [[] 3] [[] [[] 3]] [[5] [[5]]] 7]]
+
+
+
+
+
+
+
+
+
 (comment 
 
 ;; Analyze nest-inspector line by line.
