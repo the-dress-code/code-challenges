@@ -172,21 +172,25 @@ coinset = [4 9 14 15 16 25]
 
 ;;;;;;;;  RETURN COLL OF ONLY ODD NUMBERS
 
-(loop
-    [init-coll [1 2 3 4 5 6 7 8]
-     new-coll []]
+(defn only-odds? [x]
 
-  (if (empty? init-coll)
-    
-    new-coll
-    
-    (let [first-item (first init-coll)
-          odd-dude (when (odd? first-item)
-                     first-item)
-          odd-coll (conj new-coll odd-dude)
-          small-coll (rest init-coll)]
+  (loop
+      [remaining x
+       result []]
 
-      (recur small-coll odd-coll)))) 
+    (if (empty? remaining)
+      
+      result
+      
+      (let [first-item (first remaining)
+            odd-dude (when (odd? first-item)
+                       first-item)
+            odd-coll (conj result odd-dude)
+            small-coll (rest remaining)]
+
+        (recur small-coll odd-coll)))))
+
+(only-odds? [1 2 3 4 5 6 7 8]) 
 
 ;; => [1 nil 3 nil 5 nil 7 nil]
 
@@ -197,7 +201,7 @@ coinset = [4 9 14 15 16 25]
 ; why are my nils there?
 
 ; the implied else is returning nil
-; nil is being conj'd onto new-coll
+; nil is being conj'd onto result
 
 
 ;;;;;;;;;  RETURN COLL OF ONLY ODD NUMBERS, DONT LET THE NILS IN, DO IT RIGHT, NO NIL FILTERING
@@ -418,13 +422,13 @@ coinset = [4 9 14 15 16 25]
 
 ;; SUCCESS!
 
-; now go back and try again:
+; SUNDAY - now go back and try again:
 
 ;;;;;;;;;  INC ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
 
-; step 1 process the nest
+; x step 1 process the nest
 
-(defn process-nest [x]
+(defn complicated-nest-process [x]
 
   (let [initial []
         coll x]
@@ -440,55 +444,38 @@ coinset = [4 9 14 15 16 25]
 
          (let [first-item (first remaining)
                new-coll (if (coll? first-item)
-                          (conj result (process-nest first-item))
+                          (conj result (complicated-nest-process first-item))
                           (conj result first-item))]
-           new-coll)
+           new-coll) ; the whole point of this let is to get a new collection. the return value of this let is new-coll.
 
-         (rest remaining ))))))
+         (rest remaining))))))
 
-(process-nest [1 2 3 [4 5] 6]) ;; => [1 2 3 [4 5] 6]
+(complicated-nest-process [1 2 3 [4 5] 6]) ;; => [1 2 3 [4 5] 6]
 
-; step 2, insert the work to check if first-item is even. inc if even, otherwise, give me first-item.
+; ? refactor to take work out of recur - recur is doing too much, too complicated
 
-(defn inc-the-evens [x]
+(defn simple-nest-process [x]
 
-  (let [initial []
-        coll x]
+  (loop [result [] ; binding
+         remaining x] ; binding
 
-    (loop [result initial
-           remaining coll]
+    (if (empty? remaining) ; 
 
-      (if (empty? remaining)
+      result
 
-        result
+      (let [first-item (first remaining)
+            new-coll (if (coll? first-item)
+                     (conj result (simple-nest-process first-item))
+                     (conj result first-item))]
 
-        (recur
+        (recur new-coll (rest remaining)))))) ; learn: recur dont return (a value)
 
-         (let [first-item (first remaining)
-               new-coll (if (coll? first-item)
-                          (conj result (inc-the-evens first-item))
-                          (conj result 
-                                (if (even? first-item)
-                                  (conj result (inc first-item))
-                                  result)))]
-           new-coll)
+(simple-nest-process [1 2 [4] 4])
+;; => [1 2 [4] 4]
 
-         (rest remaining ))))))
+;; START HERE
 
-(inc-the-evens [1 2 3 [4 5] 6])
-;; => [[]
-;;     [[] 3]
-;;     [[] [[] 3]]
-;;     [[5] [[5]]]
-;;     [[] [[] 3] [[] [[] 3]] [[5] [[5]]] 7]]
-
-
-
-
-
-
-
-
+; ?  insert the work to check if first-item is even. inc if even, otherwise, give me first-item.
 
 (comment 
 
@@ -496,11 +483,15 @@ coinset = [4 9 14 15 16 25]
 
 ; - every time i do something, say what i am doing with the result of that thing.
 
+; - the answer is never to the right.
+
 ; - for example, what are you doing with the result of let?  im returning it as the val of my fn
 
 ; - imagine each fn is replaced with its value. what are you doing with that value?
 
-;-  be vigilant of what im actually doing vs what i want to be doing = this is where bugs live
+; - everything is a black box - what are you doing with the result of the black box?
+
+;  -  be vigilant of what im actually doing vs what i want to be doing = this is where bugs live
 
 (prn "------START OVER------")
 
@@ -594,17 +585,4 @@ coinset = [4 9 14 15 16 25]
 
 ; or 
 
-(dec (val (first {25 2 10 2}))
-
-
-
-
-
-
-
-
-)
-
-
-
-
+(dec (val (first {25 2 10 2})))
