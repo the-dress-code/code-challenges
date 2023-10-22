@@ -506,7 +506,9 @@ coinset = [4 9 14 15 16 25]
 
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;; BACK TO THE ACTUAL PROBLEM ;;;;;;;;;;;;;;;;;
 
 ;; What do you have? 
 
@@ -557,7 +559,52 @@ coinset = [4 9 14 15 16 25]
       coll coinset]
 
   (loop [result initial
-         remaining coll]))
+         remaining coll]
+
+; START HERE
+
+; - Create tests
+
+    (if (empty? remaining)
+      
+      (if (zero? target)
+
+        result  ; do this if target = 0, remaining = empty
+        
+        (recur ; do this if target = not 0, remaining = empty
+
+         (let [ (result)]
+
+             result) ; what do you want to do to result? find the largest key, dec its val.
+                     ; what could result look like at this point? {24 1 10 2}
+                     ; step 1 find largest key or first key
+         
+
+         remaining)))))
+
+
+; end comment
+)
+
+(-> {25 2 10 2}
+    first
+    val
+    dec)
+;; => 1
+
+; or 
+
+(dec (val (first {25 2 10 2}))
+
+
+
+
+
+
+
 
 )
+
+
+
 
