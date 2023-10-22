@@ -152,21 +152,23 @@ coinset = [4 9 14 15 16 25]
 
 ;;;;;;; INCREMENT EACH ITEM IN COLL
 
-(loop [initial-coll [1 2 3 4]
-       new-coll []]
+(defn inc-them-all [x]
 
-  (if (empty? initial-coll)
+(loop [remaining x
+       result []]
 
-    new-coll
-    
-    (let [first-dude (first initial-coll)
-          bigger-dude (inc first-dude)
-          incd-coll (conj new-coll bigger-dude)
-          small-coll (rest initial-coll)]
+    (if (empty? remaining)
 
-      (recur small-coll incd-coll))))
+      result
+      
+      (let [first-dude (first remaining)
+            bigger-dude (inc first-dude)
+            incd-coll (conj result bigger-dude)
+            small-coll (rest remaining)]
 
-;; => [2 3 4 5]
+        (recur small-coll incd-coll)))))
+
+(inc-them-all [1 2 3 4 5])
 
 ;; SUCCESS!
 
@@ -420,13 +422,13 @@ coinset = [4 9 14 15 16 25]
 
 ;; => [2 3 5 [90 13 15 7 [22 21 3389 78 90]] [20 21 23] 9 10 45 56]
 
-;; SUCCESS!
+;; SUCCESS! Saturday
 
 ; SUNDAY - now go back and try again:
 
 ;;;;;;;;;  INC ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
 
-; x step 1 process the nest
+; x can u process the nest?
 
 (defn complicated-nest-process [x]
 
@@ -452,7 +454,7 @@ coinset = [4 9 14 15 16 25]
 
 (complicated-nest-process [1 2 3 [4 5] 6]) ;; => [1 2 3 [4 5] 6]
 
-; ? refactor to take work out of recur - recur is doing too much, too complicated
+; x can you refactor to take work out of recur - recur is doing too much, too complicated
 
 (defn simple-nest-process [x]
 
@@ -473,9 +475,73 @@ coinset = [4 9 14 15 16 25]
 (simple-nest-process [1 2 [4] 4])
 ;; => [1 2 [4] 4]
 
-;; START HERE
+; ? can you write a fn to inc-the-evens?
+
+(defn complicated-inc-the-evens [x]
+
+  (let [initial []
+        coll x]
+
+    (loop [result initial
+           remaining coll]
+
+      (if (empty? remaining)
+        
+        result
+
+        (recur (let [first-item (first remaining)
+                     new-coll (if (even? first-item)
+                                (conj result (inc first-item))
+                                result)]
+                 new-coll)
+               
+               (rest remaining))))))
+
+(complicated-inc-the-evens [1 2 3 4])
+;; => [3 5]
+
+(defn simple-inc-the-evens [x]
+
+  (loop [result [] ; binding
+         remaining x] ; binding
+
+    (if (empty? remaining) ; 
+
+      result
+
+      (let [first-item (first remaining)
+            new-coll (if (even? first-item)
+                       (conj result (inc first-item))
+                       (conj result first-item))]
+
+        (recur new-coll (rest remaining))))))
+
+(simple-inc-the-evens [1 2 3 4 5 6])
+;; => [1 3 3 5 5 7]
+
+; ? can you work inc-the-events into simple-nest-process?
 
 ; ?  insert the work to check if first-item is even. inc if even, otherwise, give me first-item.
+
+(defn simple-nest-process [x]
+
+  (loop [result [] ; binding
+         remaining x] ; binding
+
+    (if (empty? remaining) ; 
+
+      result
+
+      (let [first-item (first remaining)
+            new-coll (if (coll? first-item)
+                     (conj result (simple-nest-process first-item))
+                     (conj result first-item))] ;;;;;;;;;;;;;;;;::::::::: DO IT HERRREEEEE
+
+        (recur new-coll (rest remaining))))))
+
+
+
+
 
 (comment 
 
