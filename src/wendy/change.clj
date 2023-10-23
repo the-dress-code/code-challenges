@@ -632,9 +632,9 @@ coinset = [4 9 14 15 16 25]
 
 ; x How is my coinset sorted? I want it descending so I fetch largest coins first. (reverse coinset)
 
-; - How many times does the first coin of the sorted coinset go into the target?  (quot target coin); {coin (quot target coin)}
+; x How many times does the first coin of the sorted coinset go into the target?  (quot target coin); {coin (quot target coin)}
 
-; - I need to know the remainder of original target and first coin of sorted coinset. result of (rem target coin) will be our new target for next coin.
+; x I need to know the remainder of original target and first coin of sorted coinset. result of (rem target coin) will be our new target for next coin.
 
 ; - How many times does the first coin of the sorted coinset go into the target? 
 
@@ -685,26 +685,39 @@ coinset = [4 9 14 25]
 (coin-count 17 [25 14 9 4])
 ;; => {25 0}
 
+; x I need to know the remainder of original target and first coin of sorted coinset. result of (rem target coin) will be our new target for next coin.
+
+(let [x 17
+      coin 14
+      new-target (rem x coin)]
+  new-target)
+;; => 3
 
 
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                                        
-(loop ; anything u need to keep track of, you put in your loop
+(loop         ; anything u need to keep track of, you put in your loop
 
     [result []
      target x
      remaining coinset]
 
-  (if (empty? remaining)
+    (if (empty? remaining)
 
-    result
+      result
 
-    (let [first-item (first remaining)
+      (let [first-item (first remaining)
 
-          new-coll (if (coll? first-item)
-                     (conj result (inc-evens-in-nest first-item))
-                     (conj result (inc-if-even first-item)))] 
+            new-coll (if (coll? first-item)
+                       (conj result (inc-evens-in-nest first-item))
+                       (conj result (inc-if-even first-item)))] 
 
-      (recur new-coll (rest remaining)))))
+        (recur new-coll (rest remaining)))))
 
 
  ;;;;;;;;;;;;;;;;;;;;;;;;;;
