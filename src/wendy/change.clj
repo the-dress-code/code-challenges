@@ -70,7 +70,7 @@
 
 ; how many times does the largest coin go into x?
 
-; x = 70
+rem; x = 70
 ; coinset = [1 5 10 25]
 
 (quot 70 25)
@@ -553,6 +553,8 @@ coinset = [4 9 14 15 16 25]
 
 ;;;;;;;;;  INC ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
 
+(def simple-vector [2 3 5 [90 13 15 7 [22 21 3389 78 90]] [20 21 23] 9 10 45 56])
+
 (defn inc-if-even [x]
   (if (even? x)
     (inc x)
@@ -578,17 +580,23 @@ coinset = [4 9 14 15 16 25]
 (inc-evens-in-nest [1 2 3 [4 5] 6])
 ;; => [1 3 3 [5 5] 7]
 
+(def simple-vector [2 3 5 [90 13 15 7 [22 21 3389 78 90]] [20 21 23] 9 10 45 56])
+
 (inc-evens-in-nest simple-vector)
+;; => [3 3 5 [91 13 15 7 [23 21 3389 79 91]] [21 21 23] 9 11 45 57]
 
 ;; SUCCESS!
 
+
 (comment 
 
-;; Analyze nest-inspector line by line.
+;; Analyze fns line by line.
+
+; -  assume its all wrong and you have to prove to yourself that it is right.
 
 ; - every time i do something, say what i am doing with the result of that thing.
 
-; - the answer is never to the right.
+; - the answer is never to the right of what you're asking about.
 
 ; - for example, what are you doing with the result of let?  im returning it as the val of my fn
 
@@ -616,13 +624,13 @@ coinset = [4 9 14 15 16 25]
 
 ; - Return a map such that each key is the coin, and each value is the number of times you need that coin. 
 
-; - If x = 17 and coinset = [4 9 14 25], possible solutions are {:4 2, :9 1, :14 0, :25 0}
+; x If x = 17 and coinset = [4 9 14 25], possible solution is {:4 2, :9 1, :14 0, :25 0}
 
-;; What information do I need to accomplish / what do I want?
+;; What information do I need to accomplish goal / what do I want?
 
-; - My coinset is sorted. (notes say it is)
+; x My coinset is sorted. (problem description indicates it's sorted)
 
-; - How is my coinset sorted? I want it descending so I fetch largest coins first. (reverse coinset)
+; x How is my coinset sorted? I want it descending so I fetch largest coins first. (reverse coinset)
 
 ; - How many times does the first coin of the sorted coinset go into the target?  (quot target coin); {coin (quot target coin)}
 
@@ -648,7 +656,60 @@ coinset = [4 9 14 15 16 25]
 
 ; -------------------------------------  Start over with new result as described above, remaining as coll not including other coins in result, target as original
 
-(comment
+x = 17
+coinset = [4 9 14 25]
+
+; what is one small thing can you do to acomplish one item from above?
+
+(def x 17)
+
+; x How is my coinset sorted? I want it descending so I fetch largest coins first. (reverse coinset)
+
+(def coinset [4 9 14 25])
+
+(defn reverse-it [coinset]
+  (reverse coinset))
+
+(reverse-it coinset) ;; => (25 14 9 4)
+
+; x How many times does the first coin of the sorted coinset go into the target?  
+
+(quot x coin)
+(quot 17 9) ; = 1
+
+(defn coin-count [x coinset]
+  (let [coin (first coinset)
+        count (quot x coin)]
+    {coin count}))
+
+(coin-count 17 [25 14 9 4])
+;; => {25 0}
+
+
+
+                                       
+(loop ; anything u need to keep track of, you put in your loop
+
+    [result []
+     target x
+     remaining coinset]
+
+  (if (empty? remaining)
+
+    result
+
+    (let [first-item (first remaining)
+
+          new-coll (if (coll? first-item)
+                     (conj result (inc-evens-in-nest first-item))
+                     (conj result (inc-if-even first-item)))] 
+
+      (recur new-coll (rest remaining)))))
+
+
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 
 (let [initial []
       target x
@@ -657,9 +718,9 @@ coinset = [4 9 14 15 16 25]
   (loop [result initial
          remaining coll]
 
-; START HERE
+                                        ; START HERE
 
-; - Create tests
+                                        ; - Create tests
 
     (if (empty? remaining)
       
@@ -671,16 +732,16 @@ coinset = [4 9 14 15 16 25]
 
          (let [ (result)]
 
-             result) ; what do you want to do to result? find the largest key, dec its val.
-                     ; what could result look like at this point? {24 1 10 2}
-                     ; step 1 find largest key or first key
+           result) ; what do you want to do to result? find the largest key, dec its val.
+                                        ; what could result look like at this point? {24 1 10 2}
+                                        ; step 1 find largest key or first key
          
 
          remaining)))))
 
 
 ; end comment
-)
+
 
 (-> {25 2 10 2}
     first
@@ -691,3 +752,5 @@ coinset = [4 9 14 15 16 25]
 ; or 
 
 (dec (val (first {25 2 10 2})))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
