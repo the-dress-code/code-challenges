@@ -475,7 +475,7 @@ coinset = [4 9 14 15 16 25]
 (simple-nest-process [1 2 [4] 4])
 ;; => [1 2 [4] 4]
 
-; ? can you write a fn to inc-the-evens?
+; x can you write a fn to inc-the-evens?
 
 (defn complicated-inc-the-evens [x]
 
@@ -500,6 +500,8 @@ coinset = [4 9 14 15 16 25]
 (complicated-inc-the-evens [1 2 3 4])
 ;; => [3 5]
 
+;; update: you don't need this fn to solve for INC THE EVEN NUMBERS IN A NESTED COLLECTION
+
 (defn simple-inc-the-evens [x]
 
   (loop [result [] ; binding
@@ -519,11 +521,11 @@ coinset = [4 9 14 15 16 25]
 (simple-inc-the-evens [1 2 3 4 5 6])
 ;; => [1 3 3 5 5 7]
 
-; ? can you work inc-the-events into simple-nest-process?
+; x can you work inc-the-events into simple-nest-process?
 
-; ?  insert the work to check if first-item is even. inc if even, otherwise, give me first-item.
+; x  insert the work to check if first-item is even. inc if even, otherwise, give me first-item.
 
-(defn simple-nest-process [x]
+(defn simple-nest-process-and-inc-dec [x]
 
   (loop [result [] ; binding
          remaining x] ; binding
@@ -533,13 +535,48 @@ coinset = [4 9 14 15 16 25]
       result
 
       (let [first-item (first remaining)
+            _ (prn (str "first-item: " first-item)) 
             new-coll (if (coll? first-item)
-                     (conj result (simple-nest-process first-item))
-                     (conj result first-item))] ;;;;;;;;;;;;;;;;::::::::: DO IT HERRREEEEE
+                     (conj result (simple-nest-process-and-inc-dec first-item))
+                     (conj result (simple-inc-the-evens first-item)))
+            _ (prn (str "new-coll: " new-coll))] 
 
         (recur new-coll (rest remaining))))))
 
+(simple-nest-process-and-inc [1 2 3 [4 5] 6])
+;; => Execution error (IllegalArgumentException) at wendy.change/simple-inc-the-evens (REPL:508).
+;;    Don't know how to create ISeq from: java.lang.Long
 
+; wait, why is simple-inc-the-evens-dec recursive? 
+
+; inc-the-evens just needs to be the machine that incs one number if its even. so write that.
+
+(defn inc-if-even [x]
+  (if (even? x)
+    (inc x)
+    x))
+
+(defn inc-evens-in-nest [x]
+
+  (loop [result []
+         remaining x]
+
+    (if (empty? remaining)
+
+      result
+
+      (let [first-item (first remaining)
+
+            new-coll (if (coll? first-item)
+                       (conj result (inc-evens-in-nest first-item))
+                       (conj result (inc-if-even first-item)))] 
+
+        (recur new-coll (rest remaining))))))
+
+(simple-nest-process-and-inc [1 2 3 [4 5] 6])
+;; => [1 3 3 [5 5] 7]
+
+;; SUCCESS!
 
 
 
