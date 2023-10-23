@@ -551,6 +551,8 @@ coinset = [4 9 14 15 16 25]
 
 ; inc-the-evens just needs to be the machine that incs one number if its even. so write that.
 
+;;;;;;;;;  INC ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
+
 (defn inc-if-even [x]
   (if (even? x)
     (inc x)
@@ -573,12 +575,12 @@ coinset = [4 9 14 15 16 25]
 
         (recur new-coll (rest remaining))))))
 
-(simple-nest-process-and-inc [1 2 3 [4 5] 6])
+(inc-evens-in-nest [1 2 3 [4 5] 6])
 ;; => [1 3 3 [5 5] 7]
 
+(inc-evens-in-nest simple-vector)
+
 ;; SUCCESS!
-
-
 
 (comment 
 
