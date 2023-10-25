@@ -424,7 +424,7 @@ coinset = [4 9 14 15 16 25]
 
 ;; SUCCESS! Saturday
 
-; SUNDAY - now go back and try again:
+; SUNDAY - now go back and try again - write it fresh
 
 ;;;;;;;;;  INC ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
 
@@ -454,7 +454,7 @@ coinset = [4 9 14 15 16 25]
 
 (complicated-nest-process [1 2 3 [4 5] 6]) ;; => [1 2 3 [4 5] 6]
 
-; x can you refactor to take work out of recur - recur is doing too much, too complicated
+; x simplfy processing a nested collection (move work out of recur)
 
 (defn simple-nest-process [x]
 
@@ -470,7 +470,7 @@ coinset = [4 9 14 15 16 25]
                      (conj result (simple-nest-process first-item))
                      (conj result first-item))]
 
-        (recur new-coll (rest remaining)))))) ; learn: recur dont return (a value)
+        (recur new-coll (rest remaining)))))) ; recur dont return (a value)
 
 (simple-nest-process [1 2 [4] 4])
 ;; => [1 2 [4] 4]
@@ -500,6 +500,8 @@ coinset = [4 9 14 15 16 25]
 (complicated-inc-the-evens [1 2 3 4])
 ;; => [3 5]
 
+;; FAIL - you lost the odd numbers.
+
 ;; update: you don't need this fn to solve for INC THE EVEN NUMBERS IN A NESTED COLLECTION
 
 (defn simple-inc-the-evens [x]
@@ -521,7 +523,7 @@ coinset = [4 9 14 15 16 25]
 (simple-inc-the-evens [1 2 3 4 5 6])
 ;; => [1 3 3 5 5 7]
 
-; x can you work inc-the-events into simple-nest-process?
+; x can you work simple-inc-the-evens into simple-nest-process?
 
 ; x  insert the work to check if first-item is even. inc if even, otherwise, give me first-item.
 
@@ -549,7 +551,7 @@ coinset = [4 9 14 15 16 25]
 
 ; wait, why is simple-inc-the-evens-dec recursive? 
 
-; inc-the-evens just needs to be the machine that incs one number if its even. so write that.
+; inc-the-evens just needs to be the machine that incs just one number if its even. so write that.
 
 ;;;;;;;;;  INC ALL THE EVEN NUMBERS IN GIVEN NESTED COLL
 
@@ -585,7 +587,7 @@ coinset = [4 9 14 15 16 25]
 (inc-evens-in-nest simple-vector)
 ;; => [3 3 5 [91 13 15 7 [23 21 3389 79 91]] [21 21 23] 9 11 45 57]
 
-;; SUCCESS!
+;; SUCCESS! THIS ACTUALLY SOLVES THE PROBLEM :)
 
 
 (comment 
@@ -656,16 +658,12 @@ coinset = [4 9 14 15 16 25]
 
 ; -------------------------------------  Start over with new result as described above, remaining as coll not including other coins in result, target as original
 
-x = 17
-coinset = [4 9 14 25]
-
-; what is one small thing can you do to acomplish one item from above?
-
 (def x 17)
-
-; x How is my coinset sorted? I want it descending so I fetch largest coins first. (reverse coinset)
-
 (def coinset [4 9 14 25])
+
+; What is ONE SMALL THING you can do to accomplish one goal from above?
+
+; x How is my coinset sorted? I want it descending so I fetch largest coins first.
 
 (defn reverse-it [coinset]
   (reverse coinset))
@@ -693,15 +691,17 @@ coinset = [4 9 14 25]
   new-target)
 ;; => 3
 
+; goal  
 
+; goal
 
+; goal
 
-
-
+; goal
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                                        
-(loop         ; anything u need to keep track of, you put in your loop
+(loop ; anything u need to keep track of, you put in your loop
 
     [result []
      target x
@@ -719,10 +719,7 @@ coinset = [4 9 14 25]
 
         (recur new-coll (rest remaining)))))
 
-
  ;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 
 (let [initial []
       target x
@@ -745,7 +742,7 @@ coinset = [4 9 14 25]
 
          (let [ (result)]
 
-           result) ; what do you want to do to result? find the largest key, dec its val.
+           result) ; what do you want to do to result? find the largest key, dec its val. update the key-val to this new val.
                                         ; what could result look like at this point? {24 1 10 2}
                                         ; step 1 find largest key or first key
          
@@ -753,8 +750,9 @@ coinset = [4 9 14 25]
          remaining)))))
 
 
-; end comment
+;;;;;;;;;;;;;;;;;;;;;;
 
+; how to get dec'd val from largest key
 
 (-> {25 2 10 2}
     first
@@ -766,4 +764,41 @@ coinset = [4 9 14 25]
 
 (dec (val (first {25 2 10 2})))
 
+; update the val to this new val
+
+(def p {:name "James" :age 26})
+;;=> #'user/p
+
+(update p :age inc)
+;;=> {:name "James", :age 27}
+
+; destructure into key-value pairs first?
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+; - Target = 0, Remaining = empty ; I'm done - Return result
+
+; - Target = 0, Remaining = not empty ; I'm done - Return result
+
+; - Target = not 0, Remaining = not empty ; Keep going - Return target - keep processing like "normal"
+
+; - Target = not 0, Remaining = empty ; Keep going but with extra work :
+
+; -------------------------------------  In the result so far, dec the val of largest key with a non-0 val. This is now your new result.
+
+; -------------------------------------  Start over with new result as described above, remaining as coll not including other coins in result, target as original
+
+
+;; conditions
+
+; if both are true,
+(= 0 target) and (empty? remaining) result
+
+; if both are true,
+(= 0 target) and (= false (seq? remaining)) result
+
+; if both are true,
+(not= 0 target) and (= false (seq? remaining)) ; Keep going - Return target - keep processing like "normal"
+
+; if both are true, 
