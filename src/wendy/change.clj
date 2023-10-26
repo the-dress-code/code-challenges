@@ -787,18 +787,30 @@ coinset = [4 9 14 15 16 25]
 
 ; -------------------------------------  In the result so far, dec the val of largest key with a non-0 val. This is now your new result.
 
-; -------------------------------------  Start over with new result as described above, remaining as coll not including other coins in result, target as original
+; -------------------------------------  Start over with new result as described above. remaining should be the coll not including other coins in result, target as original
 
 
 ;; conditions
 
 ; if both are true,
-(= 0 target) and (empty? remaining) result
+(zero? target) and (empty? remaining)
+; then
+result
 
 ; if both are true,
-(= 0 target) and (= false (seq? remaining)) result
+(zero? target) and (seq remaining) 
+;then
+result
 
 ; if both are true,
-(not= 0 target) and (= false (seq? remaining)) ; Keep going - Return target - keep processing like "normal"
+(not= 0 target) and (seq remaining) 
+(recur target (rest remaining)) ; Keep going - Return what target is now - keep processing like "normal"
 
 ; if both are true, 
+(not= 0 target) and (empty? remaining) 
+
+(cond
+  (zero? target)
+  (empty? remaining)
+  (seq remaining)
+  (not= 0 target))
