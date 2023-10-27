@@ -587,7 +587,7 @@ coinset = [4 9 14 15 16 25]
 (inc-evens-in-nest simple-vector)
 ;; => [3 3 5 [91 13 15 7 [23 21 3389 79 91]] [21 21 23] 9 11 45 57]
 
-;; SUCCESS! THIS ACTUALLY SOLVES THE PROBLEM :)
+;; SUCCESS! THIS ACTUALLY SOLVES THE PROBLEM. YOU ARE DONE WITH THIS EXERCISE :) :)
 
 
 (comment 
@@ -646,13 +646,13 @@ coinset = [4 9 14 15 16 25]
 
 ;; What should we do when the following cases are true?
 
-; - Target = 0, Remaining = empty ; I'm done - Return result
+; - 1. Target = 0, Remaining = empty ; I'm done - Return result
 
-; - Target = 0, Remaining = not empty ; I'm done - Return result
+; - 2. Target = 0, Remaining = not empty ; I'm done - Return result
 
-; - Target = not 0, Remaining = not empty ; Keep going - Return target - keep processing like "normal"
+; - 3. Target = not 0, Remaining = not empty ; Keep going - Return target - keep processing like "normal"
 
-; - Target = not 0, Remaining = empty ; Keep going but with extra work :
+; - 4. Target = not 0, Remaining = empty ; Keep going but with extra work :
 
 ; -------------------------------------  In the result so far, dec the val of largest key with a non-0 val. This is now your new result.
 
@@ -703,25 +703,13 @@ coinset = [4 9 14 15 16 25]
                                        
 (loop ; anything u need to keep track of, you put in your loop
 
-    [result []
+    [result {}
      target x
-     remaining coinset]
-
-    (if (empty? remaining)
-
-      result
-
-      (let [first-item (first remaining)
-
-            new-coll (if (coll? first-item)
-                       (conj result (inc-evens-in-nest first-item))
-                       (conj result (inc-if-even first-item)))] 
-
-        (recur new-coll (rest remaining)))))
+     remaining coinset])
 
  ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(let [initial []
+(let [initial {}
       target x
       coll coinset]
 
@@ -760,11 +748,12 @@ coinset = [4 9 14 15 16 25]
     dec)
 ;; => 1
 
-; or 
-
 (dec (val (first {25 2 10 2})))
+;; => 1
 
 ; update the val to this new val
+
+(update m k f x y)
 
 (def p {:name "James" :age 26})
 ;;=> #'user/p
@@ -772,45 +761,90 @@ coinset = [4 9 14 15 16 25]
 (update p :age inc)
 ;;=> {:name "James", :age 27}
 
-; destructure into key-value pairs first?
+(def result {25 2 10 2})
+
+(update result 25 dec)
+;; => {25 1, 10 2}
+
+; cool! I don't need the threading.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; What expressions would you use in an if statement? 
 
-; - Target = 0, Remaining = empty ; I'm done - Return result
+; if (zero? target) and (empty? remaining) -> result
 
-; - Target = 0, Remaining = not empty ; I'm done - Return result
+; if (zero? target) and (seq remaining) -> result
 
-; - Target = not 0, Remaining = not empty ; Keep going - Return target - keep processing like "normal"
+; if (not= 0 target) and (seq remaining) -> Keep going - Return target - keep processing like "normal"
 
-; - Target = not 0, Remaining = empty ; Keep going but with extra work :
+; if (not= 0 target) and (empty? remaining) -> do #4
 
-; -------------------------------------  In the result so far, dec the val of largest key with a non-0 val. This is now your new result.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; -------------------------------------  Start over with new result as described above. remaining should be the coll not including other coins in result, target as original
-
-
-;; conditions
-
-; if both are true,
-(zero? target) and (empty? remaining)
-; then
-result
-
-; if both are true,
-(zero? target) and (seq remaining) 
-;then
-result
-
-; if both are true,
-(not= 0 target) and (seq remaining) 
-(recur target (rest remaining)) ; Keep going - Return what target is now - keep processing like "normal"
-
-; if both are true, 
-(not= 0 target) and (empty? remaining) 
+;; What would it look like as a cond?
 
 (cond
-  (zero? target)
-  (empty? remaining)
-  (seq remaining)
-  (not= 0 target))
+  (zero? target) result ; if target = 0, result. if target not 0, go to next ------->
+  (empty? remaining) ; if true, target = not 0 and remaining empty, do work listed below in 4. if target = not 0 and remaining not empty , go to next ------->
+  :else ; if target = not 0 and remaining not empty, then keep going, return / use target, and keep processing like "normal".
+ ; (seq remaining) ; turns out i dont need this
+ ; (not= 0 target) ; turns out i dont need this
+  ) 
+
+; 4.  Keep going but with extra work :
+
+; In the result so far, dec the val of largest key with a non-0 val. This is now your new result. 
+
+(let [result {25 2 10 2}]
+  (update result 25 dec))
+;; => {25 1, 10 2}
+
+; Start over with new result as described above. remaining should be the coll not including other coins in result, target as original
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def x 17)
+(def coinset [4 9 14 25])
+
+(rem 17 25)
+
+(defn change1 [x coinset])
+
+(loop [result {}
+       remaining coinset
+       target x]
+
+  (let [coin (first (reverse remaining))
+        new-target (- target coin)]
+    
+    (cond
+      (zero? new-target) 
+      result
+
+      (empty? remaining) 
+      (recur new-target dec-result (rest remaining))
+
+      :else (recur new-target result (rest remaining)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Make a coin checker
+
+; what does it do? 
+; it evaluates (- target coin). if zero, make count one. if neg, make count 0, if pos, give me the result as new target
+
+(defn coin-checker [target coin]
+  (let [diff (- target coin)
+        result (cond 
+                 (zero? diff) {coin (inc 0)}
+                 (neg? diff) {coin 0}
+                 (pos? diff) {coin (inc 0)})]
+    result))
+
+(coin-checker 17 14)
+;; => {14 1}
+
+; write a simpler function that tells you yes or no if you can make change with your coinset for a given amount
+
+; make a machine that processes a coinset, checking to see how many of each coin we need for a given amount.
