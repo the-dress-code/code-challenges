@@ -807,25 +807,25 @@ coinset = [4 9 14 15 16 25]
 (def x 17)
 (def coinset [4 9 14 25])
 
-(rem 17 25)
+; WIP
 
-(defn change1 [x coinset])
+#_(defn change1 [x coinset]
 
-(loop [result {}
-       remaining coinset
-       target x]
+    (loop [result {}
+           remaining coinset
+           target x]
 
-  (let [coin (first (reverse remaining))
-        new-target (- target coin)]
-    
-    (cond
-      (zero? new-target) 
-      result
+      (let [coin (first (reverse remaining))
+            new-target (- target coin)]
+        
+        (cond
+          (zero? new-target) 
+          result
 
-      (empty? remaining) 
-      (recur new-target dec-result (rest remaining))
+          (empty? remaining) 
+          (recur new-target dec-result (rest remaining))
 
-      :else (recur new-target result (rest remaining)))))
+          :else (recur new-target result (rest remaining))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -845,6 +845,6 @@ coinset = [4 9 14 15 16 25]
 (coin-checker 17 14)
 ;; => {14 1}
 
-; write a simpler function that tells you yes or no if you can make change with your coinset for a given amount
+; in between idea: write a simpler function that tells you yes or no if you can make change with your coinset for a given amount
 
-; make a machine that processes a coinset, checking to see how many of each coin we need for a given amount.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
