@@ -71,6 +71,8 @@
 ; how many times does the largest coin go into x?
 
 rem; x = 70
+
+
 ; coinset = [1 5 10 25]
 
 (quot 70 25)
@@ -366,6 +368,8 @@ coinset = [4 9 14 15 16 25]
 
 ;;;;;;;;;;; USE RECURSION ON SIMPLER NESTED COLLECTION (NO INC)
 
+(prn "------START OVER------")
+
 (def simpler-vector [1 202 [53 466] 7])
 
 (defn nest-inspector [x]
@@ -458,19 +462,20 @@ coinset = [4 9 14 15 16 25]
 
 (defn simple-nest-process [x]
 
-  (loop [result [] ; binding
-         remaining x] ; binding
+  (loop [result [] 
+         remaining x]
 
-    (if (empty? remaining) ; 
+    (if (empty? remaining)
 
       result
 
       (let [first-item (first remaining)
-            new-coll (if (coll? first-item)
-                     (conj result (simple-nest-process first-item))
-                     (conj result first-item))]
 
-        (recur new-coll (rest remaining)))))) ; recur dont return (a value)
+            new-coll (if (coll? first-item)
+                       (conj result (simple-nest-process first-item))
+                       (conj result first-item))]
+
+        (recur new-coll (rest remaining))))))
 
 (simple-nest-process [1 2 [4] 4])
 ;; => [1 2 [4] 4]
@@ -549,6 +554,8 @@ coinset = [4 9 14 15 16 25]
 ;; => Execution error (IllegalArgumentException) at wendy.change/simple-inc-the-evens (REPL:508).
 ;;    Don't know how to create ISeq from: java.lang.Long
 
+(prn "------START OVER------")
+
 ; wait, why is simple-inc-the-evens-dec recursive? 
 
 ; inc-the-evens just needs to be the machine that incs just one number if its even. so write that.
@@ -592,9 +599,9 @@ coinset = [4 9 14 15 16 25]
 
 (comment 
 
-;; Analyze fns line by line.
+;; Analyze line by line.
 
-; -  assume its all wrong and you have to prove to yourself that it is right.
+; - assume its all wrong and you have to prove to yourself that it is right.
 
 ; - every time i do something, say what i am doing with the result of that thing.
 
@@ -606,9 +613,7 @@ coinset = [4 9 14 15 16 25]
 
 ; - everything is a black box - what are you doing with the result of the black box?
 
-;  -  be vigilant of what im actually doing vs what i want to be doing = this is where bugs live
-
-(prn "------START OVER------")
+; - be vigilant of what im actually doing VS what i want to be doing = this is where bugs live
 
 )
 
@@ -630,7 +635,7 @@ coinset = [4 9 14 15 16 25]
 
 ;; What information do I need to accomplish goal / what do I want?
 
-; x My coinset is sorted. (problem description indicates it's sorted)
+; x My coinset is sorted. (description indicates it's sorted)
 
 ; x How is my coinset sorted? I want it descending so I fetch largest coins first. (reverse coinset)
 
@@ -690,14 +695,6 @@ coinset = [4 9 14 15 16 25]
       new-target (rem x coin)]
   new-target)
 ;; => 3
-
-; goal  
-
-; goal
-
-; goal
-
-; goal
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                                        
@@ -804,10 +801,6 @@ coinset = [4 9 14 15 16 25]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def x 17)
-(def coinset [4 9 14 25])
-
-; WIP
 
 #_(defn change1 [x coinset]
 
@@ -834,7 +827,7 @@ coinset = [4 9 14 15 16 25]
 ; what does it do? 
 ; it evaluates (- target coin). if zero, make count one. if neg, make count 0, if pos, give me the result as new target
 
-(defn coin-checker [target coin]
+#_(defn coin-checker [target coin]
   (let [diff (- target coin)
         result (cond 
                  (zero? diff) {coin (inc 0)}
@@ -842,9 +835,281 @@ coinset = [4 9 14 15 16 25]
                  (pos? diff) {coin (inc 0)})]
     result))
 
-(coin-checker 17 14)
+#_(coin-checker 17 14)
 ;; => {14 1}
 
-; in between idea: write a simpler function that tells you yes or no if you can make change with your coinset for a given amount
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; USING DIFFERENCE INSTEAD OF QUOTION
+
+(defn change-bones [x coinset]
+
+  (loop [result []
+         target x
+         remaining coinset]
+    
+    (let [coin (first (reverse remaining))
+          _ (prn (str "coin: " coin))
+          diff (- target coin)
+          _ (prn (str "diff: " diff))
+          new-result (cond 
+                       (zero? diff) (conj result [coin (inc 0)])
+                       (neg? diff) (conj result {coin 0})
+                       (pos? diff) (conj result [coin (inc 0)])) ; i need to call the fn on itself in here?
+          _ (prn (str "new-result: " new-result))]
+      
+      (recur new-result diff (rest remaining)))))
+
+
+(change-bones 70 [1 10 25])
+
+; what do i need?
+
+; i need a machine that works thru a collection, and can explore diff branches
+
+; i need a machine to see if a coin will fit into a target and/or how many times it fits.
+
+; i need something to keep count of how many times a coin fits into the target.
+
+; if i was doing it in real life, id pick up the biggests coins, then the next.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(cond
+  (zero? target) result
+  (empty? remaining) ; #4 special stuff - back up and take out a coin, start over
+  :else ; (in other words, if target = not 0 and remaining not empty, keep going, return / use target, and keep processing like "normal".
+  ) 
+
+(defn change-with-quot [x coinset]
+
+  (loop [result []
+         target x
+         remaining coinset]
+
+    (if (zero? target)
+
+      result
+      
+      (let [coin (first (reverse remaining))
+            _ (prn (str "coin: " coin))
+            quotient (quot target coin)
+            _ (prn (str "quotient: " quotient))
+            new-target (rem target coin)
+            _ (prn (str "new-target: " new-target))
+            new-result (if (empty? remaining)
+                         (update result (first result) dec) ; take one biggest coin away, and do it all again.
+                         (conj result {coin quotient})) ; you need to call itself? do something to this thing before you conj it to the result. what do i need to do to {coin quote. how di use rem. i need to use the remainder. new target is not being used. can i make a fn outside of this fn? what kinda machine would it be? 
+            _ (prn (str "new-result: " new-result))]
+        
+        (recur new-result new-target (rest remaining))))))
+
+(change-with-quot 17 [4 9 14 25])
+
+
+steps
+
+coin (first (reverse remaining))
+quotient (quot target coin)
+new-target (rem target coin)
+if new-target is zero, 
+   (conj result {coin quotient}). you're done. totally done. go no further. thats the answer.
+    else recur
+         coin (first (reverse remaining))
+         quotient (quot new-target coin)
+         new-target (rem new-target coin)
+         if new-target is zero, 
+               (conj result {coin quotient})
+               else recur
+                    coin (first (reverse remaining))
+                    quotient (quot new-target coin)
+                    new-target (rem new-target coin)
+                    if new-target is zero, 
+                        (conj result {coin quotient})
+                         else recur  
+                              coin (first (reverse remaining))
+                              quotient (quot new-target coin)
+                              new-target (rem new-target coin)
+                              if new-target is zero, 
+                                  (conj result {coin quotient})
+                                   else recur
+
+so it seems you want to be recurring with new-target, new-result, and (rest remaining)
+
+What's the other case?
+
+new-result:
+if (not (zero?) new-target) and (empty? remaining)
+    take new-result and fix it: (update new-result (first new-result) dec)
+
+if quotient is zero, give result without that coin and quotient.
+
+what do we want the following to be?
+
+remaining coinset: ALL coins except for the one thats are larger than target and the one coin / key we dec'd
+new-target: as it stands 
+new-result: {25 0 10 1} i think, all coins before the one we dec'd and then the one we dec'd.
+
+; Start over with new result as described above, remaining as coll not including other coins in result, target as original
+
+; what do you want to do to result? find the largest key, dec its val. update the key-val to this new val.
+                   ; what could result look like at this point? {25 1 10 2}
+                   ; step 1 find largest key or first key
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+steps
+
+coin (first (reverse remaining))
+quotient (quot target coin)
+new-target (rem target coin)
+new-result (if (zero? new-target))
+             then (if (not (zero? quotient)))
+                    then (conj result {coin quotient}) ; you're done. totally done. go no further. thats the answer.
+                    else (if (empty? remaining)) 
+                             then (update result coin dec)
+                             else recur
+
+new-result (cond
+             (zero? new-target) (if (not (zero? quotient) 
+                                         (conj result {coin quotient})
+                                         result))
+             (empty? remaining) (update result coin dec)
+             :else (if (not (zero? quotient) 
+                         (conj result {coin quotient})
+                         result)))
+
+recur with new-target, new-result, and (rest remaining)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn change-with-quot-2 [x coinset]
+
+  (loop [result {}
+         target x
+         remaining coinset]
+      
+    (let [coin (first (reverse remaining))
+          _ (prn (str "coin: " coin))
+          quotient (quot target coin) ;;; NUL POINTER _- FIGURE IT OUT
+          _ (prn (str "quotient: " quotient))
+          _ (prn (str "target: " target))
+          new-target (rem target coin)
+          _ (prn (str "new-target: " new-target))
+          new-result  (cond
+
+                        (empty? remaining) ;;;;;;; ; if remaining is empty, fix the new-result and run stuff over again.
+                                                  ;; what does the standard "run stuff" look like? (conj result {coin quotient}) - build a result!
+                        (update result coin dec)
+
+                        (zero? new-target) 
+
+                        (if (not (zero? quotient))
+                          (conj result {coin quotient})
+                          result)
+                        
+                        :else (if (not (zero? quotient))
+                                (conj result {coin quotient})
+                                result))
+
+          _ (prn (str "new-result: " new-result))]
+      
+      (recur new-result new-target (rest remaining)))))
+
+(change-with-quot-2 17 [4 9 14 25])
+
+; never getting another coin
+
+; fix that
+
+
+
+
+what do we want the following to be if i gotta dec a coin?
+
+remaining coinset: ALL coins except for the one thats are larger than target and the one coin / key we dec'd
+new-target: as it stands 
+new-result: {25 0 10 1} i think, all coins before the one we dec'd and then the one we dec'd.
+
+
+
+(defn change-with-quot-3 [x coinset]
+
+  (loop [result {}
+         target x
+         remaining coinset]
+
+    (if (zero? target)
+
+      result
+    
+        (let [coin (first (reverse remaining))
+              _ (prn (str "coin: " coin))
+              quotient (quot target coin) ;;; NUL POINTER - FIGURE OUT WHY
+              _ (prn (str "quotient: " quotient))
+              _ (prn (str "target: " target))
+              new-target (rem target coin)
+              _ (prn (str "new-target: " new-target))
+              new-result  (cond
+
+                            (empty? remaining) ;;;;;;; ; if remaining is empty, fix the new-result and run stuff over again.
+                            ;; what does the standard "run stuff" look like? (conj result {coin quotient}) - build a result!
+                            (update result coin dec)
+                            
+                            :else (if (not (zero? quotient))
+                                    (conj result {coin quotient})
+                                    result))
+
+              _ (prn (str "new-result: " new-result))]
+          
+          (recur new-result new-target (rest remaining))))))
+
+(change-with-quot-3 17 [4 9 14 25])
+
+; fix null pointer above
+
+; never getting another coin besides the first
+
+; fix that
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defn inc-evens-in-nest [x]
+
+  (loop [result []
+         remaining x]
+
+    (if (empty? remaining)
+
+      result
+
+      (let [first-item (first remaining)
+
+            new-coll (if (coll? first-item)
+                       (conj result (inc-evens-in-nest first-item))
+                       (conj result (inc-if-even first-item)))] 
+
+        (recur new-coll (rest remaining))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; write a fn that takes a collection, walks thru it, and return coll that indicates whether or not a coin will go into the trget
+
+
+(defn divisible-by [x y]
+  (<= 1 (quot x y)))
+
+(divisible-by 10 5)
+
+(defn walk-the-coins [x]
+
+  (loop [result []
+         remaining x]))
+
+
+
+
