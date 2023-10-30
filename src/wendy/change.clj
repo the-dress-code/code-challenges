@@ -882,6 +882,7 @@ coinset = [4 9 14 15 16 25]
   ) 
 
 (defn change-with-quot [x coinset]
+"using if"
 
   (loop [result []
          target x
@@ -985,6 +986,7 @@ recur with new-target, new-result, and (rest remaining)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn change-with-quot-2 [x coinset]
+"using cond"
 
   (loop [result {}
          target x
@@ -1069,11 +1071,9 @@ new-result: {25 0 10 1} i think, all coins before the one we dec'd and then the 
 
 ; fix null pointer above
 
-; never getting another coin besides the first
+; according to prns, we're never getting another coin besides the first
 
 ; fix that
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1097,19 +1097,30 @@ new-result: {25 0 10 1} i think, all coins before the one we dec'd and then the 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; write a fn that takes a collection, walks thru it, and return coll that indicates whether or not a coin will go into the trget
+; write a fn that takes a collection, walks thru it, returns an answer of whether or not a coin will go into target
 
+(defn divisible-by? [target coin]
+  (if (<= 1 (quot target coin))
+    "true"
+    "false"))
 
-(defn divisible-by [x y]
-  (<= 1 (quot x y)))
+(divisible-by? 3 5)
 
-(divisible-by 10 5)
-
-(defn walk-the-coins [x]
+(defn walk-the-coins [target coinset]
 
   (loop [result []
-         remaining x]))
+         remaining coinset]
 
+    (if (empty? remaining)
 
+      result
 
+      (let [coin (first remaining)
+            answer (divisible-by? target coin)
+            new-coll (conj result answer)]
+
+        (recur new-coll (rest remaining))))))
+
+(walk-the-coins 17 [4 9 14 25])
+;; => ["true" "true" "true" "false"]
 
