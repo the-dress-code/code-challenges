@@ -864,6 +864,35 @@ coinset = [4 9 14 15 16 25]
 
 (change-bones 70 [1 10 25])
 ;; => {25 1, 10 1, 1 1}
+;; this fn can tell me the coin and count of 1 if it can go in at least 1 time.
+
+(defn change-bones-again [x coinset]
+
+  (loop [result {}
+         target x
+         remaining (reverse coinset)]
+
+    (if (empty? remaining)
+
+      result
+
+      (let [coin (first remaining)
+            _ (prn (str "coin: " coin))
+            diff (- target coin)
+            _ (prn (str "diff: " diff))
+            new-result (cond 
+                         (neg? diff) nil
+                         (zero? diff) {}
+                         :else (change-bones-again diff (rest remaining)))]
+
+        (conj result [coin (inc 0)])
+        
+        (recur result diff (rest remaining))))))
+
+(change-bones-again 70 [1 10 25])
+;; => {}
+;;;; what theeeeeeeee    blachhhhhhhhh
+
 
 ; what do i need?
 
