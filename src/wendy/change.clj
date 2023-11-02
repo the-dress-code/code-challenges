@@ -930,7 +930,7 @@ coinset = [4 9 14 15 16 25]
             new-target (rem target coin)
             _ (prn (str "new-target: " new-target))
             new-result (if (empty? remaining)
-                         (update result (first result) dec) ; take one biggest coin away, and do it all again.
+                         (update result coin dec) ; take one biggest coin away, and do it all again.
                          (conj result [coin quotient])) ; you need to call itself? do something to this thing before you conj it to the result. what do i need to do to {coin quote. how di use rem. i need to use the remainder. new target is not being used. can i make a fn outside of this fn? what kinda machine would it be? 
             _ (prn (str "new-result: " new-result))]
         
@@ -938,8 +938,26 @@ coinset = [4 9 14 15 16 25]
 ;; => #'wendy.change/change-with-quot
 
 (change-with-quot 17 [4 9 14 25])
-;; => Execution error (NullPointerException) at wendy.change/change-with-quot (REPL:895).
-;;    null
+; Execution error (NullPointerException) at wendy.change/change-with-quot (REPL:899).
+; null
+
+"coin: 25"
+"quotient: 0"
+"new-target: 17"
+"new-result: {25 0}"
+"coin: 14"
+"quotient: 1"
+"new-target: 3"
+"new-result: {25 0, 14 1}"
+"coin: 9"
+"quotient: 0"
+"new-target: 3"
+"new-result: {25 0, 14 1, 9 0}"
+"coin: 4"
+"quotient: 0"
+"new-target: 3"
+"new-result: {25 0, 14 1, 9 0, 4 0}"
+"coin: "
 
 
 steps
@@ -1008,11 +1026,11 @@ new-result (if (zero? new-target))
 
 new-result (cond
              (zero? new-target) (if (not (zero? quotient) 
-                                         (conj result {coin quotient})
+                                         (conj result [coin quotient])
                                          result))
              (empty? remaining) (update result coin dec)
              :else (if (not (zero? quotient) 
-                         (conj result {coin quotient})
+                            (conj result [coin quotient])
                          result)))
 
 recur with new-target, new-result, and (rest remaining)
@@ -1054,6 +1072,8 @@ recur with new-target, new-result, and (rest remaining)
       (recur new-result new-target (rest remaining)))))
 
 (change-with-quot-2 17 [4 9 14 25])
+;; => Execution error (NullPointerException) at wendy.change/change-with-quot-2 (REPL:1269).
+;;    null
 
 ; prob: only one coin/count pair getting in
 
@@ -1121,6 +1141,8 @@ recur with new-target, new-result, and (rest remaining)
           (recur new-result new-target (rest remaining))))))
 
 (change-with-quot-3 17 [4 9 14 25])
+;; => Execution error (NullPointerException) at wendy.change/change-with-quot-3 (REPL:1125).
+;;    null
 
 (first ())
 ;; => nil
@@ -1135,8 +1157,6 @@ recur with new-target, new-result, and (rest remaining)
 ;     where are you trying to use things that doesn't exist? 
 
 ; what is remaining? ()
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1281,6 +1301,272 @@ recur with new-target, new-result, and (rest remaining)
 
 ; What else do we need?
 
-; we need the value of (quot target coin) as quotient
-; we need the value of (rem target coin) as new-target.
-; at what point do i start over or reassign the targert?
+; 1. a condition to deal with remaining being empty.
+
+; 2. we need the value of (quot target coin) as quotient
+
+; 3. we need the value of (rem target coin) as new-target.
+
+; 4. at what point do i start over or reassign the targert?
+
+; 5. remember the conditions
+
+; if (zero? target) result
+
+; if (not= 0 target) and (empty? remaining) -> do #4
+
+; if (not= 0 target) and (seq remaining) -> Keep going - Return target - keep processing like "normal"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; COND :
+
+(cond
+  (zero? target) result ; if target = 0, result. if target not 0, go to next ------->
+  (empty? remaining) ; if true, target = not 0 and remaining empty, do work listed below in 4. if target = not 0 and remaining not empty , go to next ------->
+  :else ; if target = not 0 and remaining not empty, then keep going, return / use target, and keep processing like "normal".
+
+;; IF :
+
+(if (zero? target)
+
+  result
+
+  (if (empty? remaining)
+
+    (update result coin dec)
+ ; dec val of largest key with non-0 val. this is the new-result to work with in future. recur again. target as initial.
+    _____________ ;recur with stuff
+    )))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; x Do coin/count pair inline without sep fn
+
+; x Work in conditional for (if (empty? remaining)). hint, write the condition before you use it.
+
+#_(defn coins-with-counts
+  [x coinset]
+
+  (loop [result {}
+         target x
+         remaining (reverse coinset)]
+
+    (if (zero? target)
+      result
+      (if (empty? remaining) ; if target is not zero, and theres nothing left in remaining:
+        (let [new-result (update result coin dec)]
+      ;   new-result 
+      ; bind that value to new-result
+      ; loop again but we need the following
+        ; our new-result that was dec'd
+        ; what target?
+        ; what is remaining?
+      
+      (let [coin (first remaining)
+            quotient (quot target coin)
+            new-target (rem target coin)
+            redo-result (update result coin dec)
+            (conj result [coin quotient])] ; building answer
+
+        (recur new-result new-target (rest remaining))))))))
+
+#_(coins-with-counts 17 [4 9 14 25])
+;; unfinished
+
+
+; keep track of the REMAINDER
+
+(defn coins-quots-rems
+  [target coinset]
+
+(loop [result {}
+       remaining (reverse coinset)] 
+
+  (if (empty? remaining)
+
+    result
+
+    (let [coin (first remaining)
+          quotient (quot target coin)
+          remainder (rem target coin)
+          new-coll (conj result [coin [quotient remainder]])]
+
+      (recur new-coll (rest remaining))))))
+
+(coins-quots-rems 17 [4 9 14 25])
+;; => {25 [0 17], 14 [1 3], 9 [1 8], 4 [4 1]}
+
+; this returns a map of kv pairs. the val vector is quotient and remainder.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#_(defn change-with-quot [x coinset]
+"using if"
+
+  (loop [result {}
+         target x
+         remaining (reverse coinset)]
+
+    (if (zero? target)
+      result
+      (if (empty? remaining)
+        (let [coin (first remaining)
+              _ (prn (str "coin: " coin))
+              quotient (quot target coin)
+              _ (prn (str "quotient: " quotient))
+              new-target (rem target coin)
+              _ (prn (str "new-target: " new-target))
+              new-result (update result coin dec)
+              _ (prn (str "new-result: " new-result))]
+          
+          (recur new-result new-target (rest remaining)))
+
+        (let [coin (first remaining)
+              quotient (quot target coin)]
+
+          (conj result [coin quotient])
+
+         (recur new-result new-target (rest remaining)))))))
+;; => #'wendy.change/change-with-quot
+
+#_(change-with-quot 17 [4 9 14 25])
+;; => {25 0}, broken
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; make fn that says make change or not
+
+; Because I have a process where i have coin, quotient, remainder for all my coins
+; first thing: am i done?
+;                yes? give me result
+;                no? do work again - maybe different work?
+
+(defn coins-quots
+  [target coinset]
+  (loop [result {}
+         remaining (reverse coinset)] 
+    (if (empty? remaining)
+      result
+      (let [coin (first remaining)
+          quotient (quot target coin)
+          new-coll (conj result [coin quotient])]
+        (recur new-coll (rest remaining)))))) 
+
+(coins-quots 17 [4 9 14 25]) ;; => {25 0, 14 1, 9 1, 4 4}
+
+(defn coins-quots-rems
+  [target coinset]
+  (loop [result {}
+         remaining (reverse coinset)] 
+    (if (empty? remaining)
+      result
+      (let [coin (first remaining)
+           quotient (quot target coin)
+           remainder (rem target coin)
+           new-coll (conj result [coin [quotient remainder]])]
+       (recur new-coll (rest remaining))))))
+
+(coins-quots-rems 17 [4 9 14 25]) ;; => {25 [0 17], 14 [1 3], 9 [1 8], 4 [4 1]}
+
+; no, you're not done. 
+
+; write a fn that checks if your new-coll equals target
+
+; write a fn that checks to see if (true or false) any number of coins in coinset will sum to equal target.
+
+(vals {25 0, 14 1, 9 1, 4 4})
+;; => (0 1 1 4)
+
+(vals {25 [0 17], 14 [1 3], 9 [1 8], 4 [4 1]})
+;; => ([0 17] [1 3] [1 8] [4 1])
+
+if remainder is zero, coinset will meet target.
+if quotient is greater than 0, 
+
+(keys {25 0, 14 1, 9 1, 4 4})
+;; => (25 14 9 4)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; BUT CONSIDER BASE CASES
+
+; each time (- target coin) is not zero or negative, increase the coin count by 1: [coin (inc 0)]
+ 
+(defn base-cases [target coin]
+  (cond
+    (neg? target) nil
+    (zero? target) {}
+    :else (conj result [coin (inc 0)])))
+
+(defn coins-with-base
+  [x coinset]
+
+  (loop [result {}
+         target x
+         remaining coinset] 
+
+    (if (seq remaining)
+      
+      (let [coin (first remaining) ;; [4 9 14 25]
+            new-target (- target coin) ;; 
+            new-coll (cond
+                      (neg? new-target) (coins-with-base x coinset)
+                      (zero? new-target) "done"
+                      :else (conj result [coin (inc 0)]))]
+        (recur new-coll new-target (rest remaining)))
+
+      result))) 
+
+(coins-with-base 5 [1 1 1 1 1])
+;; => "done"
+
+;; how do i make 70 work with pennies
+
+; given the following, how could this work?
+
+(def target 70)
+
+(def coinset [1])
+
+; x = 70
+; coinset = [1]
+
+(quot x (first coinset))
+(quot 70 1) ;; => 70
+
+
+{(first coinset) (quot target (first coinset))}
+
+;; {1 70}
+
+;; {coin target}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(comment
+
+what do you have?
+
+   x = an amount you need to make change for
+
+   coinset = a collection of coins available to you, in whatever amount you need of each coin
+
+how would you solve this in real life?
+
+   I'd pull the largest coins first, then the next largest coins, and the next til i had the change I needed.
+
+can you subtract coins in coinset one by one from x until you have nothing?
+
+get coin from coinset.
+
+subtract coin from x (- x coin)
+
+if result is pos? 
+
+subtract coin from 
+
+
+
+
+)
