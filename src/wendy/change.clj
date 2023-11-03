@@ -4,11 +4,13 @@
 (defn make-change [x coinset]
   {})
 
-(println (make-change 6 [1 5 10 25])) ;; => {:5 1 :1 1} is the how we want our data to look
-(println (make-change 6 [3 4]))
-(println (make-change 6 [1 3 4]))
-(println (make-change 6 [5 7]))
-(println (make-change 16 [5 7 9]))
+(comment 
+  (println (make-change 6 [1 5 10 25])) ;; => {:5 1 :1 1} is the how we want our data to look
+  (println (make-change 6 [3 4]))
+  (println (make-change 6 [1 3 4]))
+  (println (make-change 6 [5 7]))
+  (println (make-change 16 [5 7 9]))
+)
 
 ; whats the first easiest thing you can do? 
 
@@ -825,7 +827,7 @@ coinset = [4 9 14 15 16 25]
 ; what does it do? 
 ; it evaluates (- target coin). if zero, make count one. if neg, make count 0, if pos, give me the result as new target
 
-#_(defn coin-checker [target coin]
+(defn coin-checker [target coin]
   (let [diff (- target coin)
         result (cond 
                  (zero? diff) {coin (inc 0)}
@@ -833,7 +835,7 @@ coinset = [4 9 14 15 16 25]
                  (pos? diff) {coin (inc 0)})]
     result))
 
-#_(coin-checker 17 14)
+(coin-checker 17 14)
 ;; => {14 1}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -891,7 +893,7 @@ coinset = [4 9 14 15 16 25]
 
 (change-bones-again 70 [1 10 25])
 ;; => {}
-;;;; what theeeeeeeee    blachhhhhhhhh
+;; what?
 
 
 ; what do i need?
@@ -1156,26 +1158,8 @@ recur with new-target, new-result, and (rest remaining)
 ; null pointer: fn trying to use something that does not exist
 ;     where are you trying to use things that doesn't exist? 
 
-; what is remaining? ()
+; what is remaining here? ()
 
-;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn inc-evens-in-nest [x]
-
-  (loop [result []
-         remaining x]
-
-    (if (empty? remaining)
-
-      result
-
-      (let [first-item (first remaining)
-
-            new-coll (if (coll? first-item)
-                       (conj result (inc-evens-in-nest first-item))
-                       (conj result (inc-if-even first-item)))] 
-
-        (recur new-coll (rest remaining))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1242,13 +1226,7 @@ recur with new-target, new-result, and (rest remaining)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; write a fn that takes a collection and a target, and returns a map with kv pairs of coins and counts.
-
-; first, make the coin counter.
-
-(defn coin-count
-  [target coin]
-  [coin (quot target coin)])
+; write a fn that takes a collection and a target, and returns a map with kv pairs of coins and counts. counts are max number of times a coin can go into target without going over.
 
 (defn coins-with-counts
   [target coinset]
@@ -1261,7 +1239,7 @@ recur with new-target, new-result, and (rest remaining)
     result
 
     (let [coin (first remaining)
-          pair (coin-count target coin)
+          pair [coin (quot target coin)]
           new-coll (conj result pair)]
 
       (recur new-coll (rest remaining))))))
@@ -1273,14 +1251,10 @@ recur with new-target, new-result, and (rest remaining)
 
 ; now REVERSE the coinset before you start walking thru it, takes coll and target, returns a map with kv pairs of coins and counts.
 
-(defn coin-count
-  [target coin]
-  [coin (quot target coin)])
-
 (defn coins-with-counts
   [target coinset]
 
-(loop [result {}
+ (loop [result {}
        remaining (reverse coinset)] ; this is the initial binding of the loop
 
 
@@ -1289,7 +1263,7 @@ recur with new-target, new-result, and (rest remaining)
     result
 
     (let [coin (first remaining)
-          pair (coin-count target coin)
+          pair [coin (quot target coin)]
           new-coll (conj result pair)]
 
       (recur new-coll (rest remaining))))))
@@ -1322,7 +1296,7 @@ recur with new-target, new-result, and (rest remaining)
 ;; COND :
 
 (cond
-  (zero? target) result ; if target = 0, result. if target not 0, go to next ------->
+  (zero? target) result 
   (empty? remaining) ; if true, target = not 0 and remaining empty, do work listed below in 4. if target = not 0 and remaining not empty , go to next ------->
   :else ; if target = not 0 and remaining not empty, then keep going, return / use target, and keep processing like "normal".
 
@@ -1334,18 +1308,15 @@ recur with new-target, new-result, and (rest remaining)
 
   (if (empty? remaining)
 
-    (update result coin dec)
- ; dec val of largest key with non-0 val. this is the new-result to work with in future. recur again. target as initial.
+    (update result coin dec) ; dec val of largest key with non-0 val. this is the new-result to work with in future. recur again. target as initial.
     _____________ ;recur with stuff
     )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; x Do coin/count pair inline without sep fn
-
 ; x Work in conditional for (if (empty? remaining)). hint, write the condition before you use it.
 
-#_(defn coins-with-counts
+(defn coins-with-counts
   [x coinset]
 
   (loop [result {}
@@ -1371,7 +1342,7 @@ recur with new-target, new-result, and (rest remaining)
 
         (recur new-result new-target (rest remaining))))))))
 
-#_(coins-with-counts 17 [4 9 14 25])
+(coins-with-counts 17 [4 9 14 25])
 ;; unfinished
 
 
@@ -1471,9 +1442,9 @@ recur with new-target, new-result, and (rest remaining)
 
 ; no, you're not done. 
 
-; write a fn that checks if your new-coll equals target
+; write a way to check if your new-coll equals target?
 
-; write a fn that checks to see if (true or false) any number of coins in coinset will sum to equal target.
+; write a way to check to see if (true or false) any number of coins in coinset will sum to equal target.?
 
 (vals {25 0, 14 1, 9 1, 4 4})
 ;; => (0 1 1 4)
@@ -1486,6 +1457,12 @@ if quotient is greater than 0,
 
 (keys {25 0, 14 1, 9 1, 4 4})
 ;; => (25 14 9 4)
+
+(flatten (repeat 70 [3 10])) 
+
+;; (3 10 3 10 3 10 3 10....)
+
+; now that i have a lot of coins, can i reduce these to a smaller set that equals the target?
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1518,29 +1495,12 @@ if quotient is greater than 0,
 
       result))) 
 
-(coins-with-base 5 [1 1 1 1 1])
+(coins-with-base 17 [4 9 14 25])
+;; => Execution error (StackOverflowError)
+;;    null
+
+(coins-with-case 5 [1 1 1 1 1])
 ;; => "done"
-
-;; how do i make 70 work with pennies
-
-; given the following, how could this work?
-
-(def target 70)
-
-(def coinset [1])
-
-; x = 70
-; coinset = [1]
-
-(quot x (first coinset))
-(quot 70 1) ;; => 70
-
-
-{(first coinset) (quot target (first coinset))}
-
-;; {1 70}
-
-;; {coin target}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1554,19 +1514,176 @@ what do you have?
 
 how would you solve this in real life?
 
-   I'd pull the largest coins first, then the next largest coins, and the next til i had the change I needed.
+  1. Take as many of the largest coin from x without going in the negative. Put those coins in a pile.
+  2. Take as many of the next largest coin from the now smaller-x without going negative. Put those coins in a pile.
+  3. Take as many of the next largest coin from the smaller-x without going negative. Put those coins in a pile.
+  4. Repeat until smaller-x is zero. In other words, stop when smaller-x is zero.
 
 can you subtract coins in coinset one by one from x until you have nothing?
 
-get coin from coinset.
+   get coin from coinset.
 
-subtract coin from x (- x coin)
+   subtract coin from x (- x coin). this is now smaller-x.
 
-if result is pos? 
+   if (pos? smaller-x)
+       do this fn over again (getting a coin, (- smaller-x coin))
 
-subtract coin from 
+;;;;;;;;;;;;;;;;;;;;;;;;
 
+can i be creative in how i solve this problem?
 
+can i throw coins up in the air and which ever fall first i use and try to make a solution?
 
+can i build a solution from just the even coins?
+
+can i build a solution from just the odd coins?
+
+can i skip every other can and try to make a solution from those coins?
 
 )
+
+(defn coins-with-base
+  [x coinset]
+
+  (loop [result {}
+         target x
+         remaining coinset] 
+
+    (if (seq remaining)
+      
+      (let [coin (first remaining) 
+            new-target (- target coin)
+            new-coll (cond
+                      (neg? new-target) (coins-with-base x coinset)
+                      (zero? new-target) [coin 1]
+                      :else (conj result [coin (inc 0)]))]
+        (recur new-coll new-target (rest remaining)))
+
+      result))) 
+
+(coins-with-base 70 [3 10])
+;; => {3 1, 10 1}
+;; wrong answer
+;; look at where its giving you an answer. its the wrong info or wrong place.
+;; why?
+;; when?
+;; wrong time
+;; wrong reason
+
+; theres three things im looping with
+; what are all (9?) combos
+; what do you do in each one?
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; how do I make 1 coin work with a target?
+
+; target = 70
+; coinset = [1]
+
+(quot x (first coinset))
+(quot 70 1) ;; => 70
+
+{(first coinset) (quot target (first coinset))}3
+;; {1 70}  which is also in this case : {coin target}
+
+(flatten (repeat 70 [3 10])) 
+
+(flatten (repeat x coinset))
+
+(defn coins-base-repeat
+  [x coinset]
+
+  (loop [solution {}
+         target-amount x
+         purse (flatten (repeat x coinset))] 
+
+    (if (seq purse)
+      
+      (let [
+            _ (prn (str "purse: " purse))
+            coin (first purse) 
+            _ (prn (str "coin: " coin))
+            new-target-amount (- target-amount coin)
+            _ (prn (str "new-target-amount: " new-target-amount))
+            new-coll (cond
+                      (neg? new-target-amount) nil
+                      (zero? new-target-amount) [coin (inc 0)]
+                      :else (conj solution [coin (inc 0)]))
+            _ (prn (str "new-coll: " new-coll))]
+        (recur new-coll new-target-amount (rest purse)))
+
+      solution))) 
+
+(coins-base-repeat 3 [1 2])
+
+
+
+; make sequence of coins.
+; what do i want to do with that?
+; pick up all the ones that sum to make target.
+; count all the same coins.
+
+; figure out how to iron the whole sheet at once.
+
+; by picking up each coin individually, im ironing each piece (and wasting time)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; RANDOM TIME!
+
+;; how can i use randomness to solve my problem? can i make random counts of coins?
+
+(defn generate [x coin-set] 
+  (zipmap coin-set (repeatedly (fn [] (rand-int x)))))
+
+(generate 10 [1 2 3 5])
+;; => {1 8, 2 3, 3 4, 5 9}
+
+(defn valid? [x solution] 
+  (= x (apply + (map (fn [[k v]] (* k v)) solution))))
+
+; generate random solutions and check to see if valid
+
+(defn generate-til-valid [x coin-set]
+  (loop [solution (generate x coin-set)] ; with loop, i could keep track of another value if wanted
+    (if (valid? x solution)
+      solution
+      (recur (generate x coin-set)))))
+
+(comment
+
+if valid? is true, result
+if valid? is false, keep generating random solutions
+)
+
+(defn generate-til-valid [x coin-set]
+  (let [solution (generate x coin-set)] 
+    (if (valid? x solution)
+      solution
+      (recur x coin-set))))
+
+; modify generate to (quot x coin) for each coin - map, no zipmap. need the coin. generate map step by step.
+
+; will blow up if no answer (bail after 10,000) bc no way to say if no answer
+
+(defn generate [x coin-set] 
+  (let [coin (first coin-set)]
+    (zipmap coin-set (repeatedly (fn [] (rand-int (quot x coin)))))))
+
+(generate 10 [1 2 3 5])
+
+;; i have a collection and I need to process it.
+
+(map f coll)
+
+;; what do i need my fn to do?
+
+;; turn a collection into a map: coins are keys, rand-ints (no larger than quot) are vals
+
+;; write a fn for map that generates rand-ints based on my coins, no larger than quot
+
+(map (fn [coin] (rand-int (quot 10 coin))) [1 2 3 5])
+;; => (3 2 0 0)
+
+;; now make the above fn put the coins as keys and the above items as vals.
