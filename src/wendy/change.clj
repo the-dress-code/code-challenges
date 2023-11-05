@@ -1632,20 +1632,25 @@ can i skip every other can and try to make a solution from those coins?
 
 ;; RANDOM TIME!
 
-;; how can i use randomness to solve my problem? can i make random counts of coins?
+;; how can i use randomness to solve my problem? 
+
+;; Create fn that assigns random ints as counts of coins.
 
 (defn generate [x coin-set] 
   (zipmap coin-set (repeatedly (fn [] (rand-int x)))))
 
 (generate 10 [1 2 3 5])
 ;; => {1 8, 2 3, 3 4, 5 9}
+;; SUCCESS
+
+;; Create fn that checks if a possible solution is a valid solution.
 
 (defn valid? [x solution] 
   (= x (apply + (map (fn [[k v]] (* k v)) solution))))
 
-; generate random solutions and check to see if valid
+;; Create fn that generates possible solutions until it reaches a valid solution.
 
-(defn generate-til-valid [x coin-set]
+(defn generate-til-valid [x coin-set] ; using loop instead of let
   (loop [solution (generate x coin-set)] ; with loop, i could keep track of another value if wanted
     (if (valid? x solution)
       solution
@@ -1657,33 +1662,179 @@ if valid? is true, result
 if valid? is false, keep generating random solutions
 )
 
-(defn generate-til-valid [x coin-set]
+(defn generate-til-valid [x coin-set] ; using let instead of loop
   (let [solution (generate x coin-set)] 
     (if (valid? x solution)
       solution
       (recur x coin-set))))
 
-; modify generate to (quot x coin) for each coin - map, no zipmap. need the coin. generate map step by step.
+;; TODO:
 
-; will blow up if no answer (bail after 10,000) bc no way to say if no answer
+;; generate fn 
 
-(defn generate [x coin-set] 
-  (let [coin (first coin-set)]
-    (zipmap coin-set (repeatedly (fn [] (rand-int (quot x coin)))))))
+;; 1.  get coin from coinset. use let.
 
-(generate 10 [1 2 3 5])
+;; 2.  use rand-int of (quot x coin) instead of x (plus 1 to include the quot. this caps the rand-int to (quot x coin).
 
-;; i have a collection and I need to process it.
+;; 3.  use map instead of zipmap to generate a hash map step by step.
 
-(map f coll)
+;; 4.  bail on answer after 10,000 tries if no answer
 
-;; what do i need my fn to do?
+;;;;;;;
 
-;; turn a collection into a map: coins are keys, rand-ints (no larger than quot) are vals
+;; 1. get coin from coinset.
+
+(let [coin (first coin-set)]
+  coin)
+
+;; 2. change exclusive n to rand-int.
+
+(rand-int (+ 1 (quot 10 5))) ;; => the result will be 0, 1, or 2. The result of (quot x coin) here is 2.
+
+;; 3. use map instead of zipmap to generate a hash map step by step.
+
+;; whatcha got? i have a collection and I need to process it.
+
+;; (map f coll)
+
+;; whatcha need? a fn to process my coll. What do I need my fn to do?
+
+;; turn my coll into a hash map: coins are keys, rand-ints are vals.
 
 ;; write a fn for map that generates rand-ints based on my coins, no larger than quot
 
-(map (fn [coin] (rand-int (quot 10 coin))) [1 2 3 5])
-;; => (3 2 0 0)
+(map (fn [coin] (rand-int (+ 1 (quot 10 coin)))) [1 2 3 5])
+;; => (8 3 3 2)
+;; these are my vals
 
 ;; now make the above fn put the coins as keys and the above items as vals.
+
+(mapcat hash-map 
+     [1 2 3 5] ;; coll of my coins i want to be keys
+     (map (fn [coin] (rand-int (+ 1 (quot 10 coin)))) [1 2 3 5])) ;; coll of rand-ints i want to be vals
+;; => ([1 3] [2 4] [3 2] [5 0])
+
+(map hash-map 
+     [1 2 3 5] ;; coll of my coins i want to be keys
+     (map (fn [coin] (rand-int (+ 1 (quot 10 coin)))) [1 2 3 5])) ;; coll of rand-ints i want to be vals
+;; => ({1 10} {2 2} {3 2} {5 2})
+
+
+(comment 
+
+;;;;; USING MAP
+
+(map f coll)
+
+(map f coll coll)
+
+; just do the work in your anon fn. what work?
+
+; map __?____  over your coinset
+
+; what do you want to map over your coinset?
+
+; random vals made from using rand-int
+
+
+;;;;; USING REDUCE
+
+; what do you want?
+
+; change my coinset into a map with vals associated with my coinset items (coins)
+
+; a hash-map: the keys are coins from coinset, the vals are the rand-vals from (map (fn [coin] (rand-int (+ 1 (quot x coin)))) coinset)
+
+(reduce f coll)
+
+; f takes two arguments
+
+(reduce f val coll)
+
+;  Returns the result of applying f to val and the first item in coll, then applying f to that result and the 2nd item, etc.
+
+;  What f can I apply to val and first item in coll?
+
+(defn rand-val-generator
+ [x coin]
+  (rand-int (+ 1 (quot x coin))))
+
+(rand-val-generator 10 5)
+;; => 1
+
+(reduce rand-val-generator {} [1 2 3 5])
+;; =>    class clojure.lang.PersistentArrayMap cannot be cast to class java.lang.Number 
+
+(map (fn [coin] (rand-int (+ 1 (quot 10 coin)))) [1 2 3 5])
+;; => (1 5 3 1) ;; these are my rand vals
+
+(reduce hash-map
+     [1 2 3 5] ;; coll of my coins i want to be keys
+     (map (fn [coin] (rand-int (+ 1 (quot 10 coin)))) [1 2 3 5])) ;; coll of rand-ints i want to be vals
+;; => {{{{[1 2 3 5] 8} 4} 2} 0}
+
+; what does just the f part look like?
+; make coins ur keys...
+
+
+(reduce (fn [x coin]
+          (rand-int (+ 1 (quot x coin))))
+        {}
+        [1 2 3 5])
+;; =>    class clojure.lang.PersistentArrayMap cannot be cast to class java.lang.Number 
+;; =>    init val of x is {}, and quot is expecting a number, so this doesn't work.
+
+
+(reduce (fn [acc nxt] ; init val of acc is 2nd arg to reduce {}, then its last return val of reducing fn (the anon fn).
+                      ; nxt is 1st item of supplied coll
+
+          (assoc acc nxt (rand-int (+ 1 (quot 10 nxt))))) 
+        {} 
+        [1 2 3 5])
+;; => {1 4, 2 1, 3 3, 5 2}
+;; => {1 5, 2 0, 3 1, 5 2}
+;; => {1 5, 2 5, 3 3, 5 1}
+;; => {1 10, 2 1, 3 1, 5 1}
+
+
+;;;;;;; MY NEW GENERATE FN
+
+(defn generate-w-reduce
+  [x coin-set]
+  (reduce (fn [acc nxt]
+          (assoc acc nxt (rand-int (+ 1 (quot x nxt))))) 
+        {} 
+        coin-set))
+
+
+
+(generate-w-reduce 10 [1 2 3 5])
+;; => {1 3, 2 3, 3 2, 5 2}
+;; This fn produces a collection of randomly generated counts for each coin, with a count no larger result of (quot x coin)
+
+
+;;;;;;; MY OLD VALID? FN
+
+
+(defn valid? [x solution] 
+  (= x (apply + (map (fn [[k v]] (* k v)) solution))))
+
+
+;; MY OLD GENERATE-TIL-VALID FN
+
+
+(defn generate-til-valid [x coin-set] 
+  (loop [solution (generate-w-reduce x coin-set)] ; with loop, i could keep track of another value if wanted
+    (if (valid? x solution)
+      solution
+      (recur (generate-w-reduce x coin-set)))))
+
+(generate-til-valid 10 [1 2 3 5])
+;; => {1 3, 2 1, 3 0, 5 1}
+
+; at some point, u need to use apply
+
+; if you follow small cycles of what do i need / how do get it? youll be done soon.
+; if not precise, i will chase my tail.
+)
+
