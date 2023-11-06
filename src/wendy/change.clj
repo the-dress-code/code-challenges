@@ -1,16 +1,43 @@
 (ns wendy.change
   (:gen-class))
 
-(defn make-change [x coinset]
-  {})
+(defn possible-solution
+  [x coin-set]
+  (reduce (fn [acc nxt]
+            (let [any-count (rand-int (+ 1 (quot x nxt)))]
+              (if (pos? any-count)
+                (assoc acc nxt any-count)
+               acc))) 
+        {} 
+        coin-set))
+
+(defn valid?
+  [x solution]
+  (= x (apply + (map (fn [[coin count]] (* coin count)) solution))))
+
+
+(defn make-change
+  [x coin-set]
+  (loop [solution (possible-solution x coin-set)
+         tries 0]
+    (if (valid? x solution)
+      solution
+      (if (< tries 10000)
+        (recur (possible-solution x coin-set) (inc tries))
+        "Nope, can't make change"))))
 
 (comment 
-  (println (make-change 6 [1 5 10 25])) ;; => {:5 1 :1 1} is the how we want our data to look
+  (println (make-change 6 [1 5 10 25]))
   (println (make-change 6 [3 4]))
   (println (make-change 6 [1 3 4]))
   (println (make-change 6 [5 7]))
   (println (make-change 16 [5 7 9]))
 )
+
+; nov 6 2023, 1:00 AM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; The journey begins.
 
 ; whats the first easiest thing you can do? 
 
@@ -1666,7 +1693,11 @@ if valid? is false, keep generating random solutions
   (let [solution (generate x coin-set)] 
     (if (valid? x solution)
       solution
-      (recur x coin-set))))
+      (recur x coin-set)))
+
+(valid? 10 {1 8, 2 3, 3 4, 5 9})
+
+)
 
 ;; TODO:
 
@@ -1797,31 +1828,27 @@ if valid? is false, keep generating random solutions
 ;; => {1 10, 2 1, 3 1, 5 1}
 
 
-;;;;;;; MY NEW GENERATE FN
+;;;;;;;  MY NEW GENERATE FN
 
 (defn generate-w-reduce
   [x coin-set]
   (reduce (fn [acc nxt]
-          (assoc acc nxt (rand-int (+ 1 (quot x nxt))))) 
+            (assoc acc nxt (rand-int (+ 1 (quot x nxt))))) 
         {} 
         coin-set))
 
-
-
 (generate-w-reduce 10 [1 2 3 5])
 ;; => {1 3, 2 3, 3 2, 5 2}
-;; This fn produces a collection of randomly generated counts for each coin, with a count no larger result of (quot x coin)
+;; This fn produces a collection of randomly generated counts for each coin, with a count no larger than result of (quot x coin)
 
 
-;;;;;;; MY OLD VALID? FN
-
+;;;;;;;  MY OLD VALID? FN
 
 (defn valid? [x solution] 
   (= x (apply + (map (fn [[k v]] (* k v)) solution))))
 
 
-;; MY OLD GENERATE-TIL-VALID FN
-
+;;;;;;;  MY OLD GENERATE-TIL-VALID FN
 
 (defn generate-til-valid [x coin-set] 
   (loop [solution (generate-w-reduce x coin-set)] ; with loop, i could keep track of another value if wanted
@@ -1831,10 +1858,138 @@ if valid? is false, keep generating random solutions
 
 (generate-til-valid 10 [1 2 3 5])
 ;; => {1 3, 2 1, 3 0, 5 1}
+;; SUCCESS :)
 
-; at some point, u need to use apply
 
-; if you follow small cycles of what do i need / how do get it? youll be done soon.
-; if not precise, i will chase my tail.
+;;;;; REWRITE VALID?
+
+(defn valid?
+  [x solution]
+  (= x (apply + (map (fn [[coin count]] (* coin count)) solution))))
+
+(valid? 5 {1 3, 2 1})
+;; => true
+(valid? 10 {1 8, 2 3, 3 4, 5 9})
+;; => false
+(valid? 10 {1 3 2 3 5 1 10 1})
+;; => false
+
+
+;;;;;; UPDATE THIS FN to bail after 10,000 tries
+
+; what do i need?
+
+; i need to know if the coinset will not return change for x.
+
+; i need to stop recursion if i do not retrieve an answer after 10,000 tries.
+
+; how do i get it?
+
+; keep track of how many times i recur and terminate after a certain limit is reached.
+
+; how do i keep track of how many times i recur?  inc a count
+
+(defn generate-til-valid [x coin-set] ; with loop, i could keep track of another value if wanted
+  (loop [solution (generate-w-reduce x coin-set)
+         tries 0] ; 0 is init binding 
+    (if (valid? x solution) ; if true,
+      solution ; return the solution
+      (if (< tries 10000) ; if false
+        (recur (generate-w-reduce x coin-set) (inc tries)) ; recur: generating another solution and inc'ing tries
+        "Nope, can't make change")))) ; if tries > 10,000
+
+(generate-til-valid 17 [4 9 14 25])
+;; => {4 2, 9 1, 14 0, 25 0}
+
+(generate-til-valid 10 [3 14])
+;; => "Nope, can't make change"
+
+(generate-til-valid 129 [1 128])
+;; => {1 1, 128 1}
+
+(generate-til-valid 129 [129])
+;; => {129 1}
+
+;; cool, but zeros are part of coll which is not cool.
+
+; i want to return kvs where v is not 0
+
+; don't let kv pairs in with 0 for count
+
+; alter the generative fn: if count (the val) is zero, don't assoc that kv pair. give me the acc instead.
+
+(defn generate-sin-zeros
+  [x coin-set]
+  (reduce (fn [acc nxt]
+            (if (pos? (rand-int (+ 1 (quot x nxt)))) 
+              (assoc acc nxt (rand-int (+ 1 (quot x nxt))))
+              acc))
+        {} 
+        coin-set))
+
+;; you're calling rand-int twice...
+
+(generate-sin-zeros 17 [4 9 14 25])
+;; => {4 0, 14 1}
+;; => {9 0}
+;; => {4 2, 14 0}
+;; FAIL
+
+; how bout try to filter them out?
+
+(defn generate-reduce-filter
+  [x coin-set]
+  (into {} (filter (fn [[k v]] (pos? v))
+                   (reduce (fn [acc nxt]
+                             (assoc acc nxt (rand-int (+ 1 (quot x nxt)))))
+                           {} 
+                           coin-set))))
+
+(generate-reduce-filter 17 [ 4 9 14 25])
+;; => {4 2, 9 1}
+
+;; SUCCESS!
+
+(defn generate-til-valid [x coin-set] ; with loop, i could keep track of another value if wanted
+  (loop [solution (generate-reduce-filter x coin-set)
+         tries 0] ; 0 is init binding 
+    (if (valid? x solution) ; if true,
+      solution ; return the solution
+      (if (< tries 10000) ; if false
+        (recur (generate-reduce-filter x coin-set) (inc tries)) ; recur: generating another solution and inc'ing tries
+        "Nope, can't make change"))))
+
+(generate-til-valid 17 [4 9 14 25])
+;; => {4 2, 9 1}
+
+(generate-til-valid 10 [1 2 3 5])
+;; => {1 4, 2 3}
+
+(generate-til-valid 6 [5 7])
+;; => "Nope, can't make change"
+
+;; um, you frickin' did it?
+
+; can you do it better without a filter?
+
+; what do you want your reducing fn to do?
+
+; create a rand-int
+; if pos?
+; associate the accumulator with the first item of coll and the rand-int generated with a collection
+; otherwise gimme acc
+
+(defn possible-solution
+  [x coin-set]
+  (reduce (fn [acc nxt]
+            (let [any-count (rand-int (+ 1 (quot x nxt)))]
+              (if (pos? any-count)
+                (assoc acc nxt any-count)
+               acc))) 
+        {} 
+        coin-set))
+
+(possible-solution 10 [1 2 3 5])
+;; => {1 7, 2 2, 3 1}
+
 )
-
