@@ -1927,7 +1927,7 @@ if valid? is false, keep generating random solutions
         {} 
         coin-set))
 
-;; you're calling rand-int twice...
+;; uh, you're calling rand-int twice...
 
 (generate-sin-zeros 17 [4 9 14 25])
 ;; => {4 0, 14 1}
@@ -1968,28 +1968,12 @@ if valid? is false, keep generating random solutions
 (generate-til-valid 6 [5 7])
 ;; => "Nope, can't make change"
 
-;; um, you frickin' did it?
-
-; can you do it better without a filter?
+;; um, you frickin' did it? but can you do it better without a filter?
 
 ; what do you want your reducing fn to do?
-
 ; create a rand-int
 ; if pos?
 ; associate the accumulator with the first item of coll and the rand-int generated with a collection
 ; otherwise gimme acc
-
-(defn possible-solution
-  [x coin-set]
-  (reduce (fn [acc nxt]
-            (let [any-count (rand-int (+ 1 (quot x nxt)))]
-              (if (pos? any-count)
-                (assoc acc nxt any-count)
-               acc))) 
-        {} 
-        coin-set))
-
-(possible-solution 10 [1 2 3 5])
-;; => {1 7, 2 2, 3 1}
 
 )
