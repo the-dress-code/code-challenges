@@ -2,9 +2,9 @@
   (:gen-class))
 
 (defn possible-solution
-  [x coin-set]
+  [target coin-set]
   (reduce (fn [acc nxt]
-            (let [any-count (rand-int (+ 1 (quot x nxt)))]
+            (let [any-count (rand-int (+ 1 (quot target nxt)))]
               (if (pos? any-count)
                 (assoc acc nxt any-count)
                acc))) 
@@ -12,18 +12,17 @@
         coin-set))
 
 (defn valid?
-  [x solution]
-  (= x (apply + (map (fn [[coin count]] (* coin count)) solution))))
-
+  [target solution]
+  (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
 
 (defn make-change
-  [x coin-set]
-  (loop [solution (possible-solution x coin-set)
+  [target coin-set]
+  (loop [solution (possible-solution target coin-set)
          tries 0]
-    (if (valid? x solution)
+    (if (valid? target solution)
       solution
       (if (< tries 10000)
-        (recur (possible-solution x coin-set) (inc tries))
+        (recur (possible-solution target coin-set) (inc tries))
         "Nope, can't make change"))))
 
 (comment 
@@ -1831,9 +1830,9 @@ if valid? is false, keep generating random solutions
 ;;;;;;;  MY NEW GENERATE FN
 
 (defn generate-w-reduce
-  [x coin-set]
+  [target coin-set]
   (reduce (fn [acc nxt]
-            (assoc acc nxt (rand-int (+ 1 (quot x nxt))))) 
+            (assoc acc nxt (rand-int (+ 1 (quot target nxt))))) 
         {} 
         coin-set))
 
