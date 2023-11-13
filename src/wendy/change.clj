@@ -37,16 +37,6 @@
 
 ; nov 6 2023, 1:00 AM
 
-;;;;;;;;;;;;;;;
-
-; nov 9 6:30 pm
-
-; todo ideas:
-; refactor possible-solution with map and into, instead of reduce
-; refactor make-change with a let with just tries (no loop, no solution in binding)
-
-; other options: generate a bounded list of all solutions and filter for optimal
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; The journey begins.
@@ -1992,10 +1982,6 @@ if valid? is false, keep generating random solutions
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; re-make with map and into, instead of reduce
-
-(map f coll)
-
 
 (defn possible-solution
   [target coin-set]
@@ -2008,9 +1994,36 @@ if valid? is false, keep generating random solutions
         coin-set))
 
 
+(defn valid?
+  [target solution]
+  (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
+
+
+(defn make-change
+  [target coin-set]
+  (loop [solution (possible-solution target coin-set)
+         tries 0]
+    (if (valid? target solution)
+      (do (prn tries)  
+          solution)
+      (when (< tries 10000)
+        (recur (possible-solution target coin-set) (inc tries))))))
+
+
 (make-change 1000000 [1])
 ;; => {1 1000000}
 ;; lucky!
+
+; nov 9 6:30 pm
+
+; todo ideas:
+; refactor possible-solution with map and into, instead of reduce
+; refactor make-change with a let with just tries (no loop, no solution in binding)
+
+; other options: generate a bounded list of all solutions and filter for optimal
+; re-make with map and into, instead of reduce
+
+(map f coll)
 
 (map #(let [any-count (rand-int (inc (quot 10 %2)))]
        (if (pos? any-count)
