@@ -2037,21 +2037,27 @@ if valid? is false, keep generating random solutions
 ;; => Error printing return value (ArityException) at clojure.lang.AFn/throwArity (AFn.java:429).
 ;;    Wrong number of args (1) passed to: wendy.change/eval7524/fn--7525
 
-(map dec [ 1 2 3 4])
-;; => 
-
 (into {} '(0 1 2 3) )
 ;; => Execution error (IllegalArgumentException) at wendy.change/eval7554 (REPL:2043).
 ;;    Don't know how to create ISeq from: java.lang.Long
-
-
-(quot 10 12)
-;; => 0
-
-(into [] {1 2 3 4})
-;; => [[1 2] [3 4]]
 
 (into {} [1 2 3 4])
 ;; => Execution error (IllegalArgumentException) at wendy.change/eval7564 (REPL:2054).
 ;;    Don't know how to create ISeq from: java.lang.Long
 
+(map rand-int [1 2 3 5])
+;; => (0 1 2 3)
+
+(map (fn [coin] 
+       (rand-int (inc (quot 10 coin))))
+     [1 2 3 5])
+
+(map vector 
+     [1 2 3 5] 
+     (map (fn [coin] 
+       (rand-int (inc (quot 10 coin))))
+          [1 2 3 5]))
+;; => ([1 4] [2 0] [3 1] [5 2])
+
+(into {} *1)
+;; => {1 4, 2 0, 3 1, 5 2}
