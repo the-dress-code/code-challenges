@@ -1982,6 +1982,14 @@ if valid? is false, keep generating random solutions
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; nov 9 6:30 pm
+
+; todo ideas:
+; refactor possible-solution with map and into, instead of reduce
+; refactor make-change with a let with just tries (no loop, no solution in binding)
+
+; other options: generate a bounded list of all solutions and filter for optimal
+
 
 (defn possible-solution
   [target coin-set]
@@ -1993,11 +2001,9 @@ if valid? is false, keep generating random solutions
         {} 
         coin-set))
 
-
 (defn valid?
   [target solution]
   (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
-
 
 (defn make-change
   [target coin-set]
@@ -2010,26 +2016,42 @@ if valid? is false, keep generating random solutions
         (recur (possible-solution target coin-set) (inc tries))))))
 
 
-(make-change 1000000 [1])
-;; => {1 1000000}
-;; lucky!
+(make-change 1000000 [1]) ;; => {1 1000000} ;; got lucky! it is possible tbat make-change would miss this.
 
-; nov 9 6:30 pm
+;;;; refactor possible-solution with map and into, instead of reduce
 
-; todo ideas:
-; refactor possible-solution with map and into, instead of reduce
-; refactor make-change with a let with just tries (no loop, no solution in binding)
+; [] what do you want your map fn to do? 
 
-; other options: generate a bounded list of all solutions and filter for optimal
-; re-make with map and into, instead of reduce
+; turn the items into keys in a hash-map.
+
+; assign vals based on rand-ints based off of the quot of one of the items (a coin) and a target amt given.
 
 (map f coll)
 
-(map #(let [any-count (rand-int (inc (quot 10 %2)))]
-       (if (pos? any-count)
-         (assoc %1 %2 any-count)
-         %1))
-     {})
-;; => ()
+(map (fn [acc nxt]
+            (let [any-count (rand-int (inc (quot 10 nxt)))]
+              (if (pos? any-count)
+                (assoc acc nxt any-count)
+               acc)))
+     [1 2 3 5])
+;; => Error printing return value (ArityException) at clojure.lang.AFn/throwArity (AFn.java:429).
+;;    Wrong number of args (1) passed to: wendy.change/eval7524/fn--7525
 
+(map dec [ 1 2 3 4])
+;; => 
+
+(into {} '(0 1 2 3) )
+;; => Execution error (IllegalArgumentException) at wendy.change/eval7554 (REPL:2043).
+;;    Don't know how to create ISeq from: java.lang.Long
+
+
+(quot 10 12)
+;; => 0
+
+(into [] {1 2 3 4})
+;; => [[1 2] [3 4]]
+
+(into {} [1 2 3 4])
+;; => Execution error (IllegalArgumentException) at wendy.change/eval7564 (REPL:2054).
+;;    Don't know how to create ISeq from: java.lang.Long
 
