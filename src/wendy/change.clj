@@ -2028,7 +2028,7 @@ if valid? is false, keep generating random solutions
 
 (map f coll)
 
-(map (fn [acc nxt]
+(map (fn [acc nxt] 
             (let [any-count (rand-int (inc (quot 10 nxt)))]
               (if (pos? any-count)
                 (assoc acc nxt any-count)
@@ -2037,27 +2037,51 @@ if valid? is false, keep generating random solutions
 ;; => Error printing return value (ArityException) at clojure.lang.AFn/throwArity (AFn.java:429).
 ;;    Wrong number of args (1) passed to: wendy.change/eval7524/fn--7525
 
-(into {} '(0 1 2 3) )
-;; => Execution error (IllegalArgumentException) at wendy.change/eval7554 (REPL:2043).
-;;    Don't know how to create ISeq from: java.lang.Long
 
-(into {} [1 2 3 4])
-;; => Execution error (IllegalArgumentException) at wendy.change/eval7564 (REPL:2054).
-;;    Don't know how to create ISeq from: java.lang.Long
+(defn rand-count-maker
+  [target coinset]
+  (map (fn [coin] 
+       (rand-int (inc (quot target coin))))
+       coinset))
 
-(map rand-int [1 2 3 5])
-;; => (0 1 2 3)
-
-(map (fn [coin] 
-       (rand-int (inc (quot 10 coin))))
-     [1 2 3 5])
+(rand-count-maker 10 [1 2 3 5])
+;; => (0 1 3 2)
 
 (map vector 
      [1 2 3 5] 
-     (map (fn [coin] 
-       (rand-int (inc (quot 10 coin))))
-          [1 2 3 5]))
+     (rand-count-maker 10 [1 2 3 5]))
 ;; => ([1 4] [2 0] [3 1] [5 2])
 
 (into {} *1)
 ;; => {1 4, 2 0, 3 1, 5 2}
+
+(defn possible-solution-with-zeros
+  [target coinset]
+  (into {} 
+        (map vector
+             coinset
+             (rand-count-maker target coinset))))
+
+(possible-solution-with-zeros 10 [1 2 3 5])
+;; => {1 2, 2 2, 3 0, 5 2}
+
+(defn valid?
+  [target solution]
+  (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
+
+(defn make-change
+  [target coin-set]
+  (loop [solution (possible-solution target coin-set)
+         tries 0]
+    (if (valid? target solution)
+      (do (prn tries)  
+          solution)
+      (when (< tries 10000)
+        (recur (possible-solution target coin-set) (inc tries))))))
+
+(make-change 10 [ 1 2 3 5])
+;; => {1 5, 2 1, 3 1}
+;; => {1 1, 2 2, 5 1}
+;; => {1 8, 2 1}
+;; => {1 10}
+;; => {1 8, 2 1}
