@@ -2022,21 +2022,11 @@ if valid? is false, keep generating random solutions
 
 ; [] what do you want your map fn to do? 
 
-; turn the items into keys in a hash-map.
+; generate a rand-int between 0 and one more than the quot of coin and target.
 
-; assign vals based on rand-ints based off of the quot of one of the items (a coin) and a target amt given.
+; create a hashmap, using the items in coinset as ks and the coll of randomly generated ints as vs
 
 (map f coll)
-
-(map (fn [acc nxt] 
-            (let [any-count (rand-int (inc (quot 10 nxt)))]
-              (if (pos? any-count)
-                (assoc acc nxt any-count)
-               acc)))
-     [1 2 3 5])
-;; => Error printing return value (ArityException) at clojure.lang.AFn/throwArity (AFn.java:429).
-;;    Wrong number of args (1) passed to: wendy.change/eval7524/fn--7525
-
 
 (defn rand-count-maker
   [target coinset]
@@ -2045,7 +2035,7 @@ if valid? is false, keep generating random solutions
        coinset))
 
 (rand-count-maker 10 [1 2 3 5])
-;; => (0 1 3 2)
+;; => (4 0 1 2)
 
 (map vector 
      [1 2 3 5] 
@@ -2079,9 +2069,5 @@ if valid? is false, keep generating random solutions
       (when (< tries 10000)
         (recur (possible-solution target coin-set) (inc tries))))))
 
-(make-change 10 [ 1 2 3 5])
+(make-change 10 [1 2 3 5])
 ;; => {1 5, 2 1, 3 1}
-;; => {1 1, 2 2, 5 1}
-;; => {1 8, 2 1}
-;; => {1 10}
-;; => {1 8, 2 1}
