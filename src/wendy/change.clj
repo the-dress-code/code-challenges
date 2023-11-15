@@ -2015,8 +2015,12 @@ if valid? is false, keep generating random solutions
       (when (< tries 10000)
         (recur (possible-solution target coin-set) (inc tries))))))
 
+(comment 
 
-(make-change 1000000 [1]) ;; => {1 1000000} ;; got lucky! it is possible tbat make-change would miss this.
+(make-change 1000000 [1])
+;; => {1 1000000} ;; got lucky! it is possible tbat make-change would miss this.
+
+) 
 
 ;;;; refactor possible-solution with map and into, instead of reduce
 
@@ -2024,9 +2028,7 @@ if valid? is false, keep generating random solutions
 
 ; generate a rand-int between 0 and one more than the quot of coin and target.
 
-; create a hashmap, using the items in coinset as ks and the coll of randomly generated ints as vs
-
-(map f coll)
+; create a hashmap, using coinset items as ks and rand-counts as vs.
 
 (defn rand-count-maker
   [target coinset]
@@ -2034,26 +2036,12 @@ if valid? is false, keep generating random solutions
        (rand-int (inc (quot target coin))))
        coinset))
 
-(rand-count-maker 10 [1 2 3 5])
-;; => (4 0 1 2)
-
-(map vector 
-     [1 2 3 5] 
-     (rand-count-maker 10 [1 2 3 5]))
-;; => ([1 4] [2 0] [3 1] [5 2])
-
-(into {} *1)
-;; => {1 4, 2 0, 3 1, 5 2}
-
 (defn possible-solution-with-zeros
   [target coinset]
   (into {} 
         (map vector
              coinset
              (rand-count-maker target coinset))))
-
-(possible-solution-with-zeros 10 [1 2 3 5])
-;; => {1 2, 2 2, 3 0, 5 2}
 
 (defn valid?
   [target solution]
@@ -2069,5 +2057,26 @@ if valid? is false, keep generating random solutions
       (when (< tries 10000)
         (recur (possible-solution target coin-set) (inc tries))))))
 
+
+(comment
+
+(map f coll)
+
+(map vector 
+     [1 2 3 5] 
+     (rand-count-maker 10 [1 2 3 5]))
+;; => ([1 4] [2 0] [3 1] [5 2])
+
+(into {} *1)
+;; => {1 4, 2 0, 3 1, 5 2}
+
+(rand-count-maker 10 [1 2 3 5])
+;; => (4 0 1 2)
+
+(possible-solution-with-zeros 10 [1 2 3 5])
+;; => {1 2, 2 2, 3 0, 5 2}
+
 (make-change 10 [1 2 3 5])
 ;; => {1 5, 2 1, 3 1}
+
+)
