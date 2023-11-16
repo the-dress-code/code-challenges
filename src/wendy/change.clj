@@ -1985,41 +1985,15 @@ if valid? is false, keep generating random solutions
 ; nov 9 6:30 pm
 
 ; todo ideas:
-; refactor possible-solution with map and into, instead of reduce
-; refactor make-change with a let with just tries (no loop, no solution in binding)
+; [x] refactor possible-solution with map and into, instead of reduce
+; [ ] refactor make-change with a let with just tries (no loop, no solution in binding)
 
-; other options: generate a bounded list of all solutions and filter for optimal
-
-
-(defn possible-solution
-  [target coin-set]
-  (reduce (fn [acc nxt]
-            (let [any-count (rand-int (inc (quot target nxt)))]
-              (if (pos? any-count)
-                (assoc acc nxt any-count)
-               acc))) 
-        {} 
-        coin-set))
-
-(defn valid?
-  [target solution]
-  (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
-
-(defn make-change
-  [target coin-set]
-  (loop [solution (possible-solution target coin-set)
-         tries 0]
-    (if (valid? target solution)
-      (do (prn tries)  
-          solution)
-      (when (< tries 10000)
-        (recur (possible-solution target coin-set) (inc tries))))))
+; [ ] other options: generate a bounded list of all solutions and filter for optimal
 
 (comment 
 
 (make-change 1000000 [1])
 ;; => {1 1000000} ;; got lucky! it is possible tbat make-change would miss this.
-
 ) 
 
 ;;;; refactor possible-solution with map and into, instead of reduce
@@ -2078,5 +2052,21 @@ if valid? is false, keep generating random solutions
 
 (make-change 10 [1 2 3 5])
 ;; => {1 5, 2 1, 3 1}
-
 )
+
+; refactor make-change with a let with just tries (no loop, no solution in binding)
+
+
+(defn make-change
+  [target coin-set]
+  (let [tries 0]
+    (if (valid? target (possible-solution-with-zeros target coin-set))
+      (do (prn tries)  
+          (possible-solution-with-zeros target coin-set))
+      (when (< tries 10000)
+        (recur (possible-solution-with-zeros target coin-set) (inc tries))))))
+
+(make-change 10 [1 2 3 5])
+;; => Execution error (IllegalArgumentException) at wendy.change/possible-solution-with-zeros (REPL:2015).
+;;    Don't know how to create ISeq from: java.lang.Long
+
