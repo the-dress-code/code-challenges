@@ -2070,3 +2070,25 @@ if valid? is false, keep generating random solutions
 ;; => Execution error (IllegalArgumentException) at wendy.change/possible-solution-with-zeros (REPL:2015).
 ;;    Don't know how to create ISeq from: java.lang.Long
 
+; write a fn that generates a possible solution and tests whether or not it is a valid solution.
+
+(defn rand-counts
+  [target coinset]
+  (map (fn [coin] 
+       (rand-int (inc (quot target coin))))
+       coinset))
+
+(defn rand-solution
+  [target coinset]
+  (into {} 
+        (map vector
+             coinset
+             (rand-counts target coinset))))
+
+(defn validation-machine
+  [target coinset]
+  (let [solution (rand-solution target coinset)]
+    (do (prn solution)
+        (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))))
+
+(validation-machine 10 [1 2 3 5])
