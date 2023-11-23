@@ -1447,6 +1447,11 @@ recur with new-target, new-result, and (rest remaining)
   (loop [result {}
          remaining (reverse coinset)] 
     (if (empty? remaining)
+
+
+
+
+
       result
       (let [coin (first remaining)
           quotient (quot target coin)
@@ -1645,8 +1650,6 @@ can i skip every other can and try to make a solution from those coins?
       solution))) 
 
 (coins-base-repeat 3 [1 2])
-
-
 
 ; make sequence of coins.
 ; what do i want to do with that?
@@ -2021,6 +2024,7 @@ if valid? is false, keep generating random solutions
   [target solution]
   (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
 
+
 (defn make-change
   [target coin-set]
   (loop [solution (possible-solution target coin-set)
@@ -2031,6 +2035,18 @@ if valid? is false, keep generating random solutions
       (when (< tries 10000)
         (recur (possible-solution target coin-set) (inc tries))))))
 
+
+(defn rand-solution-maker
+  [target coinset]
+  (->> coinset
+       (map (fn [coin]
+              [coin (rand-int (inc (quot target coin)))]))
+       (into {})))
+
+(rand-solution-maker 10 [1 2 3 5])
+;; => {1 0, 2 5, 3 2, 5 2}
+
+; zipmap
 
 (comment
 
