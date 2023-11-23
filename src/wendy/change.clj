@@ -2111,4 +2111,104 @@ if valid? is false, keep generating random solutions
     (do (prn solution)
         (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))))
 
+(comment 
+
 (validation-machine 10 [1 2 3 5])
+
+)
+
+; what do you need now?
+
+; for this function to run over and over again until true, if it is possible to return true.
+
+; what is another option?
+
+;;;;;;;;;;;; Generate a bounded list of all solutions and filter for optimal
+
+(comment
+
+; write an example of fn call and collection of tuples if we make all possible combinations
+
+(make-change 17 #{4 9 14 25}) [[4 1] [9 1] [14 1] [25 1]] [[4 2][9 1] [14 0] [25 0]] [[4 3] [9 1] [14 1] [25 1]] [[4 4][9 1] [14 1] [25 1]]...
+
+; what are all the possible combinations for the given target and coinset? 
+
+; limit the max count to result of (quot target coin)
+
+target = 3
+coinset = [1 3]
+
+all possible solutions:
+
+;; as maps
+
+{1 0, 3 0} ; this could be the starting coll or count
+{1 1, 3 0}
+{1 2, 3 0}
+{1 3, 3 0}
+
+{1 0, 3 1}
+{1 1, 3 1}
+{1 2, 3 1}
+{1 3, 3 1}
+
+{1 0, 3 2} ; program should bail instead of producing this result.
+......
+
+;; as vectors of tuples
+
+[[1 0] [3 0]]
+[[1 1] [3 0]]
+[[1 2] [3 0]]
+[[1 3] [3 0]]
+
+[[1 0] [3 1]]
+[[1 1] [3 1]]
+[[1 2] [3 1]]
+[[1 3] [3 1]]
+
+[[1 0] [3 2]] ; program should bail instead of producing this result
+
+; generate collection of each possiblle amount of coins available, based on (quot target coin)
+
+; what ya got there?
+
+1. collection of tuples of integers.
+2. what do i want to do with those?
+
+
+what would a smart ass do if you told them what you think you wanted?
+would the result be what u were looking for?
+
+whats the smallest thing you can change about this statement to make it a little more right, a little less wrong?
+
+what are you describing right now?
+
+engineering - small logicial steps
+
+; generalize specificity
+
+(reduce (fn [acc nxt] 
+          (assoc acc nxt (range (inc (quot 3 nxt)))))
+        {}
+        [1 3])
+;; => {1 (0 1 2 3), 3 (0 1)}
+;; uh, no.
+
+(range 5)
+;; => (0 1 2 3 4)
+
+; what do i want to keep track of?
+
+; if ive finished my coinset
+; if the range has been completed
+
+; outer loop iterates over the coinset [1 3]
+; inner loop iterates over the range (0 1 2 3)
+
+;; F*** IT UP!
+
+;; 
+
+
+)
