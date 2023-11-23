@@ -2061,30 +2061,34 @@ if valid? is false, keep generating random solutions
 ;; => {1 4, 2 0, 3 1, 5 2}
 
 (rand-count-maker 10 [1 2 3 5])
+;; => (5 2 3 1)
 ;; => (4 0 1 2)
 
 (possible-solution-with-zeros 10 [1 2 3 5])
+;; => {1 7, 2 1, 3 1, 5 0}
 ;; => {1 2, 2 2, 3 0, 5 2}
 
 (make-change 10 [1 2 3 5])
 ;; => {1 5, 2 1, 3 1}
+
+(valid? 10 {1 7, 2 1, 3 1, 5 0})
 )
 
 ; refactor make-change with a let with just tries (no loop, no solution in binding)
 
-
 (defn make-change
   [target coin-set]
-  (let [tries 0]
-    (if (valid? target (possible-solution-with-zeros target coin-set))
-      (do (prn tries)  
-          (possible-solution-with-zeros target coin-set))
-      (when (< tries 10000)
-        (recur (possible-solution-with-zeros target coin-set) (inc tries))))))
+  (loop [tries 0]
+    (let [solution (possible-solution-with-zeros target coin-set)]
+      (if (valid? target solution)
+        solution
+        (when (< tries 10000)
+          (recur (inc tries)))))))
 
 (make-change 10 [1 2 3 5])
-;; => Execution error (IllegalArgumentException) at wendy.change/possible-solution-with-zeros (REPL:2015).
-;;    Don't know how to create ISeq from: java.lang.Long
+;; => {1 1, 2 2, 3 0, 5 1}
+;; => {1 1, 2 0, 3 3, 5 0}
+
 
 ; write a fn that generates a possible solution and tests whether or not it is a valid solution.
 
