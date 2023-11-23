@@ -200,6 +200,7 @@ coinset = [4 9 14 15 16 25]
         (recur small-coll incd-coll)))))
 
 (inc-them-all [1 2 3 4 5])
+;; => [2 3 4 5 6]
 
 ;; SUCCESS!
 
@@ -2206,9 +2207,24 @@ engineering - small logicial steps
 ; outer loop iterates over the coinset [1 3]
 ; inner loop iterates over the range (0 1 2 3)
 
-;; F*** IT UP!
+;; don't be scared - just do it - F*** IT UP!
 
-;; 
+(defn make-it-a-map
+  [x]
+
+  (loop [remaining x
+         result {}]
+
+    (if (empty? remaining)
+      
+      result
+
+      (let [primero (first remaining)
+            map-result (assoc result primero 0)]
+        
+        (recur (rest remaining) map-result)))))
+
+(make-it-a-map [1 3])
 
 
 )
