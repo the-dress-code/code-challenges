@@ -2143,32 +2143,32 @@ all possible solutions:
 
 ;; as maps
 
-{1 0, 3 0} ; this could be the starting coll or count
-{1 1, 3 0}
-{1 2, 3 0}
-{1 3, 3 0}
+({1 0, 3 0} ; this could be the starting coll or count
+ {1 1, 3 0}
+ {1 2, 3 0}
+ {1 3, 3 0}
 
-{1 0, 3 1}
-{1 1, 3 1}
-{1 2, 3 1}
-{1 3, 3 1}
+ {1 0, 3 1}
+ {1 1, 3 1}
+ {1 2, 3 1}
+ {1 3, 3 1})
 
-{1 0, 3 2} ; program should bail instead of producing this result.
+{1 0, 3 2} ; program should bail instead of producing this one.
 ......
 
 ;; as vectors of tuples
 
-[[1 0] [3 0]]
-[[1 1] [3 0]]
-[[1 2] [3 0]]
-[[1 3] [3 0]]
+([[1 0] [3 0]]
+ [[1 1] [3 0]]
+ [[1 2] [3 0]]
+ [[1 3] [3 0]]
 
-[[1 0] [3 1]]
-[[1 1] [3 1]]
-[[1 2] [3 1]]
-[[1 3] [3 1]]
+ [[1 0] [3 1]]
+ [[1 1] [3 1]]
+ [[1 2] [3 1]]
+ [[1 3] [3 1]])
 
-[[1 0] [3 2]] ; program should bail instead of producing this result
+[[1 0] [3 2]] ; program should bail instead of producing this one.
 
 ; generate collection of each possiblle amount of coins available, based on (quot target coin)
 
@@ -2196,9 +2196,6 @@ engineering - small logicial steps
 ;; => {1 (0 1 2 3), 3 (0 1)}
 ;; uh, no.
 
-(range 5)
-;; => (0 1 2 3 4)
-
 ; what do i want to keep track of?
 
 ; if ive finished my coinset
@@ -2225,6 +2222,143 @@ engineering - small logicial steps
         (recur (rest remaining) map-result)))))
 
 (make-it-a-map [1 3])
+;; => {1 0, 3 0}
+
+;; what else do i need?
+
+(range (inc (quot 3 1)))
+;; => (0 1 2 3)
+
+;; map each of these to the 1 coin.
+
+(range (inc (quot 3 3)))
+;; => (0 1)
+
+;; map each of these to the 3 coin.
+
+;;;;;;; start here
+
+;;;; below doesnt work
+
+(defn solution-maker-reduce 
+  [target coinset]
+  (reduce (fn [acc nxt] 
+            (assoc acc nxt (range (inc (quot target nxt)))))
+          {}
+          coinset))
+
+(solution-maker-reduce 3 [1 3])
+;; => {1 (0 1 2 3), 3 (0 1)}
+;; nope
+
+(defn solution-maker
+  [target coinset]
+  (->> coinset
+       (map (fn [coin]
+              [coin (range (inc (quot target coin)))]))
+       (into {})))
+
+(solution-maker 3 [1 3])
+;; => {1 (0 1 2 3), 3 (0 1)}
+;; nope
+
+;; what is wrong with this?
+
+;; 1. result is one hashmap, rather than a collection of hashmaps. i wanted a coll of hashmaps.
+;; 2. vals are collections, rather than ints from the collection.
+
+;; ok rethink this
+;; coinset = [1 3]
+;; target = 3
+;; what do I need? 
+;;  all possible counts for 1
+;;  all possible counts for 3
+
+(defn coin-counts
+  [target coin]
+  (range (inc (quot target coin))))
+
+(coin-counts 3 1)
+;; => (0 1 2 3)
+
+(coin-counts 3 3)
+;; => (0 1)
+
+;; first item of coinset is k1 > first item of k1-poss-count is v1 > kv pair goes into its own map. {1 0}
+;; next item of coinset is k2 > first item of k2-poss-count is v2 > conj kv pair to existing map. {1 0, 3 0}
+;; this map added to final result. ({1 0, 3 0})
+
+;; first item of coinset is k1 > second item of k1-poss-count is v1 > kv pair goes into its own map. {1 1}
+;; next item of coinset is k2 > first item of k2-poss-count is v2 > conj kv pair to existing map. {1 1, 3 0}
+;; this map added to final result. ({1 0, 3 0} {1 1, 3 0})
+
+;; first item of coinset is k1 > third item of k1-poss-count is v1 > kv pair goes into its own map. {1 2}
+;; next item of coinset is k2 > first item of k2-poss-count is v2 > conj kv pair to existing map. {1 2, 3 0}
+;; this map added to final result. ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0})
+
+;; first item of coinset is k1 > fourth item of k1-poss-count is v1 > kv pair goes into its own map.
+;; next item of coinset is k2 > first item of k2-poss-count is v2 > conj kv pair to existing map.
+;; this map added to final result.
+
+;; when k1-poss-counts is empty, do it all again and use second item of k2-poss-count for v2.
+
+;; first item of coinset is k1 > first item of k1-poss-count is v1 > kv pair goes into its own map.
+;; next item of coinset is k2 > second item of k2-poss-count is v2 > conj kv pair to existing map.
+;; this map added to final result.
+
+;; first item of coinset is k1 > second item of k1-poss-count is v1 > kv pair goes into its own map.
+;; next item of coinset is k2 > second item of k2-poss-count is v2 > conj kv pair to existing map.
+;; this map added to final result.
+
+;; first item of coinset is k1 > third item of k1-poss-count is v1 > kv pair goes into its own map.
+;; next item of coinset is k2 > second item of k2-poss-count is v2 > conj kv pair to existing map.
+;; this map added to final result.
+
+;; first item of coinset is k1 > fourth item of k1-poss-count is v1 > kv pair goes into its own map.
+;; next item of coinset is k2 > second item of k2-poss-count is v2 > conj kv pair to existing map.
+;; this map added to final result.
+
+;; when k2-poss-counts is empty and coinset is empty, return final result.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; so what needs to happen?
+;; keep track of coinset.
+;; keep track of coin-counts.
+;; lets call coinset coins-remaining.
+;; lets call coin-counts counts-remaining.
+;; lets call () result.
+;; start making maps:
+
+;; { k1: (first coins-remaining) and v1: (first (coin-counts 3 1)), k2 (next coinset) and v2: (first (coin-counts 3 3)) }
+;; add this map to result.
+;; repeat with following: k1 same, v1 is (next (coin-counts 3 1)), k2 (next coinset), v2: (first (coin-counts 3 3))
+;; add each map to result.
+;; when (coin-counts 3 1) is empty, do it all again and use v2: (next (coin-counts 3 3)).
+;; when (coint-counts 3 3) is empty, give me the result.
+;; when coins-remaining is empty, give me the result.
+
+;; wip
+
+;; in your recur, call the main fn.
+
+(defn something
+  [target coinset]
+
+  (loop [result ()
+         coins-remaining coinset]
+
+    (if (empty? coins-remaining)
+      
+      result
+      
+      (let [coin (first coins-remaining)
+            counts (coin-counts target coin)]
+        {coin (first counts)} ;;;
+        (recur (something )))))) ;;;
+
+(something 3 [1 3])
+;; => (0 1 2 3)
 
 
 )
