@@ -2332,9 +2332,9 @@ engineering - small logicial steps
 
 ;; { k1: (first coins-remaining) and v1: (first (coin-counts 3 1)), k2 (next coinset) and v2: (first (coin-counts 3 3)) }
 ;; add this map to result.
-;; repeat with following: k1 same, v1 is (next (coin-counts 3 1)), k2 (next coinset), v2: (first (coin-counts 3 3))
+;; repeat with following: k1 same, v1 is (next (coin-counts 3 1)) until empty, k2 (next coinset), v2: (first (coin-counts 3 3))
 ;; add each map to result.
-;; when (coin-counts 3 1) is empty, do it all again and use v2: (next (coin-counts 3 3)).
+;; when (coin-counts 3 1) is empty, do it all again and use v2: (next (coin-counts 3 3)) until empty.
 ;; when (coint-counts 3 3) is empty, give me the result.
 ;; when coins-remaining is empty, give me the result.
 
@@ -2361,4 +2361,53 @@ engineering - small logicial steps
 ;; => (0 1 2 3)
 
 
+; if you have multiple loops, make the tiniest inner one first.
+
+; get the info it needs and update one coin.
+
+; start with zero'd out map.
+; seed ur function with the zero'd out map: {1 0, 3 0}
+; update a coin-count once.
+
+(update {1 0, 3 0} 1 inc)
+;; => {1 1, 3 0}
+
+; so what does ur fn need?
+
+; map, key, fn
+
+; write a fn that uses those things
+
+; what map?  {1 0, 3 0}
+; what key? one of keys from the supplied map.
+; what fn? you need to supply a fn that performs the action you need
+
+; what needs to happen with {1 0, 3 0}?
+
+; i need to update one of the keys to the next item in (0 1 2 3)
+
+; i need a way to take the nth item in the coll and update the key with that.
+
+;;;;;;; oooooooh, i can use nth.
+
+(nth '(0 1 2 3) 1)
+;; => 1
+
+(update {1 0, 3 0} 1 (fn [x] (nth '(0 1 2 3) 1)))
+;; => {1 1, 3 0}
+
+
+; how do you process a collection? map, reduce,
+
+
+
+
+
+
+
+
 )
+
+
+
+
