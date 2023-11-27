@@ -2338,6 +2338,18 @@ engineering - small logicial steps
 ;; when (coint-counts 3 3) is empty, give me the result.
 ;; when coins-remaining is empty, give me the result.
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; 11-17-23
+
+; travel thru coinset, one coin at a time, assigning v1 as first of k1-coin-count to k1 and v2 as first of k2-coin-count to k2.
+; when coinset is empty, start over with coinset, using next item in k1-coin-count for v1, original item in k2-coin-count for v2.
+; continue until k1-coin-count is empty.
+; when k1-coin-count is empty, start over doing same work as before, using coin-set, k1-coin-counts, k2-coin-counts, but this time, travel thru k2-coin-count until empty.
+; when k2-coin-count is empty, return the result.
+
+
+
+
+
 ;; wip
 
 ;; in your recur, call the main fn.
@@ -2398,13 +2410,6 @@ engineering - small logicial steps
 
 
 ; how do you process a collection? map, reduce,
-
-
-
-
-
-
-
 
 )
 
