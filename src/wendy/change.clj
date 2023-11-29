@@ -2021,6 +2021,7 @@ if valid? is false, keep generating random solutions
              coinset
              (rand-count-maker target coinset))))
 
+
 (defn valid?
   [target solution]
   (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
@@ -2338,7 +2339,7 @@ engineering - small logicial steps
 ;; when (coint-counts 3 3) is empty, give me the result.
 ;; when coins-remaining is empty, give me the result.
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;; 11-17-23
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; 11-27-23
 
 ; travel thru coinset, one coin at a time, assigning v1 as first of k1-coin-count to k1 and v2 as first of k2-coin-count to k2.
 ; when coinset is empty, start over with coinset, using next item in k1-coin-count for v1, original item in k2-coin-count for v2.
@@ -2400,16 +2401,72 @@ engineering - small logicial steps
 
 ; i need a way to take the nth item in the coll and update the key with that.
 
-;;;;;;; oooooooh, i can use nth.
+(range (inc (quot 3 1)))
+;; => (0 1 2 3)
 
 (nth '(0 1 2 3) 1)
 ;; => 1
 
+(update map key fn)
+
 (update {1 0, 3 0} 1 (fn [x] (nth '(0 1 2 3) 1)))
 ;; => {1 1, 3 0}
 
+(assoc map key val)
 
-; how do you process a collection? map, reduce,
+(assoc {1 0, 3 0} 1 (nth '(0 1 2 3) 1))
+;; => {1 1, 3 0}
+
+; how do you process a collection? map, reduce...
+
+(map f coll)
+
+(map (fn [coin] [coin (range (inc (quot 3 coin)))]) [3 1])
+;; => ([3 (0 1)] [1 (0 1 2 3)])
+;; hmm, i dont want the second item in the tuple to be a collection. but I can modify this fn to produce something useful.
+
+(map (fn [count] [1 count]) '(0 1 2 3))
+;; => ([1 0] [1 1] [1 2] [1 3])
+
+(map (fn [count] [1 count]) (range (inc (quot 3 1))))
+;; => ([1 0] [1 1] [1 2] [1 3])
+;; result is all all kv pairs for coin 1, where each tuple is [coin-1 possible-count]
+
+(map (fn [count] [3 count]) (range (inc (quot 3 3))))
+;; => ([3 0] [3 1])
+;; result is all all kv pairs for coin 3, where each tuple is [coin-2 possible-count]
+
+
+; what do i want?
+
+; collection of maps:
+
+; first round of maps:
+
+; 1st kv pair: first item from ([1 0] [1 1] [1 2] [1 3]) until empty, 2nd kv pair: first item from ([3 0] [3 1])
+
+; second round of maps: 
+
+; 1st kv pair: first item from ([1 0] [1 1] [1 2] [1 3]) until empty, 2nd kv pair: next item from ([3 0] [3 1])
+
+; can i modify the below to put the collections in a way that i want?
+
+(into {} 
+      (map vector
+           coinset
+           (rand-counts target coinset)))
+
+
+;; example of how totransform a map´s values using reduce and assoc from clojuredocs
+
+(defn transform
+  [coll]
+  (reduce (fn [ncoll [k v]] (assoc ncoll k (* 10 v)))
+          {}
+          coll))
+
+(transform {:a 1 :b 2 :c 3})
+;;{:a 10 :b 20 :c 30}
 
 )
 
