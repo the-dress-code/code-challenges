@@ -2407,12 +2407,12 @@ engineering - small logicial steps
 (nth '(0 1 2 3) 1)
 ;; => 1
 
-(update map key fn)
+(update m k f)
 
 (update {1 0, 3 0} 1 (fn [x] (nth '(0 1 2 3) 1)))
 ;; => {1 1, 3 0}
 
-(assoc map key val)
+(assoc m k v)
 
 (assoc {1 0, 3 0} 1 (nth '(0 1 2 3) 1))
 ;; => {1 1, 3 0}
@@ -2449,27 +2449,153 @@ engineering - small logicial steps
 
 ; 1st kv pair: first item from ([1 0] [1 1] [1 2] [1 3]) until empty, 2nd kv pair: next item from ([3 0] [3 1])
 
-; can i modify the below to put the collections in a way that i want?
+; sure but lets start over:
 
-(into {} 
-      (map vector
-           coinset
-           (rand-counts target coinset)))
+; look at ur projected collection of collections: you want a collection of maps. lets try map to create it. what pattern do you see in ur projected coll? values are a range. since you're building maps, you'll probably need assoc. what does assoc need? map k v
+
+; to create first set of maps with first item in coinset:
+
+(map (fn [x] (assoc {1 0, 3 0 } 1 x)) (range 4))
+;; => ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
+
+(map (fn [x] (assoc {1 0, 3 0 } 1 x)) (range (inc (quot 3 1))))
+
+; result is:
+
+({1 0, 3 0} 
+ {1 1, 3 0} 
+ {1 2, 3 0} 
+ {1 3, 3 0})
+
+(map (fn [x] (assoc {1 0, 3 0 } 3 x)) (range (inc (quot 3 3))))
+
+; result is:
+
+({1 0, 3 0} 
+ {1 0, 3 1})
+
+; to create next set of maps with next item in coinset:
+
+;;;;;;;;
+
+;(map (fn [x] (assoc {1 0, 3 0} 1 x)) (range (inc (quot 3 1))))
+(map (fn [x] (assoc {1 0, 3 0} 3 x)) (range (inc (quot 3 3))))
+
+(defn update-key-for-range
+  [m k r] 
+   (map (fn [x] (assoc m k x)) (range r)))
+
+(update-key-for-range {1 0, 3 0} 3 (inc (quot 3 3)))
+;; => ({1 0, 3 0} {1 0, 3 1})
+
+(update-key-for-range {1 0, 3 0} 1 (inc (quot 3 1)))
+;; => ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
+
+(map (fn [x] 
+       (update-key-for-range 
+        (assoc {1 0, 3 0} 3 x) 1 4)) ; this is the hashmap update-key-for-range needs
+     (range (inc (quot 3 3))))
+;; => (({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
+;;     ({1 0, 3 1} {1 1, 3 1} {1 2, 3 1} {1 3, 3 1}))
+
+(flatten *1)
+;; => ({1 0, 3 0}
+;;     {1 1, 3 0}
+;;     {1 2, 3 0}
+;;     {1 3, 3 0}
+;;     {1 0, 3 1}
+;;     {1 1, 3 1}
+;;     {1 2, 3 1}
+;;     {1 3, 3 1})
+
+; what do i need to keep track of?
+
+; coinset
+; range of counts - what do i need for this? a coin from coinset and target
+
+(let [sumpin 5
+      other 2]
+  (* sumpin other))
+
+(loop [some binding
+       other binding]
+  (recur some other))
+
+(defn seed-map
+  [coinset]
+  (->> coinset
+       (map (fn [coin] [coin 0]))
+       (into {})))
+
+(seed-map [1 3])
+;; => {1 0, 3 0}
+; boo ya!
+
+(defn do-stuff
+  [coinset target] ; for example: [1 3], 3
+
+  (loop [remaining-coins coinset ; init binding is [1 3]
+         result (seed-map coinset)] ; init binding is  {1 0, 3 0} 
+
+    (if (empty? remaining-coins) ; if no more coins in coinset,
+
+      result ; return the result map. otherwise, do work:
+
+      (let [coin (first remaining-coins) ; 1
+            count-range (range (inc (quot target coin))) ; (0 1 2 3)
+            _ (prn (str "count-range: " count-range))
+            new-coll (if (empty? count-range) ; if count-range is empty,
+                       result ; assign new-coll to result. otherwise, do work:
+                       (map (fn [x] ; map anon fn over count-range
+; problem: result is a seq here
+                              (assoc result coin x)) ; assoc 1key of {1 0 3 0} with x of ; PROBLEM
+                            count-range))] ; (0 1 2 3)
+            ; assign new-coll to ;; => ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
+        (recur (rest remaining-coins) new-coll)))))
+
+(do-stuff [1 3] 3)
+
+; doesnt work.
+; theorize why doesnt work,
+; try again, simpler though
+
+(range (inc (quot 3 1)))
+;; => (0 1 2 3)
+
+(map (fn [x] (assoc {1 0 3 0} 1 x)) (coin-counts 3 1))
+;; => ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
+; first set of results
+
+; make a fn that
+; takes a map of any size 
+; uses coins from your coinset for keys (do not hard code keys)
+
+; write a simple loop that does a simple thing first.
+
+(defn inc-items
+  [x]
+  
+  (loop [remaining x
+         result []]
+
+    (if (empty? remaining)
+
+      result
+
+      (let [coin (first remaining)
+            bigger-coin (inc coin)
+            incd-coll (conj result bigger-coin)]
+        (recur (rest remaining) incd-coll)))))
+
+(inc-items [1 3])
+;; => [2 4]
 
 
-;; example of how totransform a map´s values using reduce and assoc from clojuredocs
 
-(defn transform
-  [coll]
-  (reduce (fn [ncoll [k v]] (assoc ncoll k (* 10 v)))
-          {}
-          coll))
 
-(transform {:a 1 :b 2 :c 3})
-;;{:a 10 :b 20 :c 30}
+
 
 )
-
 
 
 
