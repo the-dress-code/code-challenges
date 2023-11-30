@@ -1651,6 +1651,7 @@ can i skip every other can and try to make a solution from those coins?
       solution))) 
 
 (coins-base-repeat 3 [1 2])
+;; => nil
 
 ; make sequence of coins.
 ; what do i want to do with that?
@@ -2177,7 +2178,6 @@ all possible solutions:
 
 1. collection of tuples of integers.
 2. what do i want to do with those?
-
 
 what would a smart ass do if you told them what you think you wanted?
 would the result be what u were looking for?
