@@ -2476,7 +2476,7 @@ engineering - small logicial steps
 
 ; to create next set of maps with next item in coinset:
 
-;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;(map (fn [x] (assoc {1 0, 3 0} 1 x)) (range (inc (quot 3 1))))
 (map (fn [x] (assoc {1 0, 3 0} 3 x)) (range (inc (quot 3 3))))
@@ -2547,7 +2547,7 @@ engineering - small logicial steps
             new-coll (if (empty? count-range) ; if count-range is empty,
                        result ; assign new-coll to result. otherwise, do work:
                        (map (fn [x] ; map anon fn over count-range
-; problem: result is a seq here
+; problem: next line with result is a seq here
                               (assoc result coin x)) ; assoc 1key of {1 0 3 0} with x of ; PROBLEM
                             count-range))] ; (0 1 2 3)
             ; assign new-coll to ;; => ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
@@ -2562,9 +2562,19 @@ engineering - small logicial steps
 (range (inc (quot 3 1)))
 ;; => (0 1 2 3)
 
+(defn coin-counts
+  [target coin]
+  (range (inc (quot target coin))))
+
+(coin-counts 3 1)
+;; => (0 1 2 3)
+
 (map (fn [x] (assoc {1 0 3 0} 1 x)) (coin-counts 3 1))
 ;; => ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
 ; first set of results
+
+(map (fn [x] (assoc {1 0, 3 0} 1 x)) (range (inc (quot 3 1))))
+;; => ({1 0, 3 0} {1 1, 3 0} {1 2, 3 0} {1 3, 3 0})
 
 ; make a fn that
 ; takes a map of any size 
@@ -2589,6 +2599,87 @@ engineering - small logicial steps
 
 (inc-items [1 3])
 ;; => [2 4]
+
+(defn mappy-items
+  [x v]
+  
+  (loop [remaining x
+         result []]
+
+    (if (empty? remaining)
+
+      result
+
+      (let [coin (first remaining) ; take a coin
+            mappy (assoc {} coin v) ; make a map with coin, give it a val
+            new-coll (conj result mappy)] ; add that map to a new-coll
+        (recur (rest remaining) new-coll))))) ; do it again with the rest of remaining and new-coll
+
+(mappy-items [1 4 2] 1)
+;; => [{1 1} {4 1} {2 1}]
+
+(mappy-items [1 3] 0)
+;; => [{1 0} {3 0}]
+
+
+(defn update-key-for-range
+  [m k r] 
+   (map (fn [x] (assoc m k x)) (range r)))
+
+(defn mapify
+  [coinset r]
+
+  (let [starter-map (seed-map coinset)]
+
+    (loop [coins-remaining coinset
+           result []]
+
+      (if (empty? coins-remaining)
+
+        result
+
+        (let [coin (first coins-remaining) 
+              coll-o-maps (update-key-for-range starter-map coin r)
+              new-coll (conj result coll-o-maps)]
+          (recur (rest coins-remaining) new-coll)))))) 
+
+(mapify [1 3] 3)
+;; => [({1 0, 3 0} {1 1, 3 0} {1 2, 3 0})
+;;     ({1 0, 3 0} {1 0, 3 1} {1 0, 3 2})]
+;; 2nd time thru doesnt assoc
+
+(mapify [ 1 3 4] 3)
+;; => [({1 0, 3 0, 4 0} {1 1, 3 0, 4 0} {1 2, 3 0, 4 0})
+;;     ({1 0, 3 0, 4 0} {1 0, 3 1, 4 0} {1 0, 3 2, 4 0})
+;;     ({1 0, 3 0, 4 0} {1 0, 3 0, 4 1} {1 0, 3 0, 4 2})]
+
+(defn mapify-thru
+  [coinset r]
+
+  (loop [coins-remaining coinset
+         starter-map (seed-map coinset)
+         result []]
+
+    (if (empty? coins-remaining)
+
+      result
+
+      (let [coin (first coins-remaining) 
+            coll-o-maps (update-key-for-range starter-map coin r)
+            ;coll-result (vec  coll-o-maps)
+           ;  _ (prn (str "coll-o-maps: " coll-result))
+            new-coll (conj result coll-o-maps)
+            _ (prn (str "newcoll: " new-coll))]
+        (recur (rest coins-remaining) starter-map new-coll)))))
+
+
+(mapify-thru [1 3] 3)
+;; => [({1 0, 3 0} {1 1, 3 0} {1 2, 3 0})
+;;     ({1 0, 3 0} {1 0, 3 1} {1 0, 3 2})]
+
+start over, start from scratch
+build a loop recur that can inc one key in a map
+then you need your loop to know which key to inc at what time
 
 )
 
