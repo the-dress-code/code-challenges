@@ -2681,6 +2681,26 @@ start over, start from scratch
 build a loop recur that can inc one key in a map
 then you need your loop to know which key to inc at what time
 
+; inc a val in a hash map
+
+(assoc map key val)
+
+(defn inc-val
+  [m k v]
+  (assoc m k (inc v)))
+
+(inc-val {1 0 3 0 2 0} 2 0)
+;; => {1 0, 3 0, 2 1}
+
+;; next, build a loop recur that incs a val of one key
+
+
+
+
+
+
+
+
 )
 
 
