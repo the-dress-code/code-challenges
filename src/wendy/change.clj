@@ -2678,21 +2678,64 @@ engineering - small logicial steps
 ;;     ({1 0, 3 0} {1 0, 3 1} {1 0, 3 2})]
 
 start over, start from scratch
-build a loop recur that can inc one key in a map
-then you need your loop to know which key to inc at what time
+build a loop recur that can inc one key / val in a map
+then you need your loop to know which key / val to inc and at what time
+
 
 ; inc a val in a hash map
 
 (assoc map key val)
 
-(defn inc-val
+(defn inc-me
   [m k v]
   (assoc m k (inc v)))
 
-(inc-val {1 0 3 0 2 0} 2 0)
+(inc-me {1 0 3 0 2 0} 2 0)
 ;; => {1 0, 3 0, 2 1}
 
-;; next, build a loop recur that incs a val of one key
+(loop [result 0]
+  (if (= result 3)
+    result
+    (recur (inc result))))
+;; => 3
+
+
+; write a loop recur that processes a collection
+
+
+(loop [remaining [1 2 3 4]
+       result []]
+  (let [primero (first remaining)
+        new-coll (conj result primero)]
+    (if (seq remaining)
+      (recur (rest remaining) new-coll)
+      result)))
+;; => [1 2 3 4]
+
+(defn walk-the-coll
+  [coll]
+  (loop [remaining coll
+         result []]
+    (let [primero (first remaining)
+          new-coll (conj result primero)]
+      (if (seq remaining)
+        (recur (rest remaining) new-coll)
+        result))))
+
+(walk-the-coll [1 2 3 4])
+;; => [1 2 3 4]
+
+(walk-the-coll {1 0 3 0})
+;; => [[1 0] [3 0]]
+
+; make a loop that can create a collection of maps where each of a specific key is incremented until it exceeds the target value
+
+; given a starter map
+; create a collection of maps
+; where a certain key is inc'd once for each map
+; until that certain key exceeeds the target value
+; rather when that certain key exceeds the target value, stop making maps.
+
 
 
 
@@ -2702,6 +2745,3 @@ then you need your loop to know which key to inc at what time
 
 
 )
-
-
-
