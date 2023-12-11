@@ -346,7 +346,7 @@ coinset = [4 9 14 15 16 25]
 
   (let [initial []
         coll x]
-    (loop
+    (loop`
         [result initial 
          remaining coll]
 
@@ -423,7 +423,7 @@ coinset = [4 9 14 15 16 25]
 
                           (conj result (nest-inspector first-item)) ; call nest-inspector on the coll! conj to result
 
-                          (conj result first-item))] ; else  conj first-item to result
+                          (conj result first-item))] ; else conj first-item to result
                                                      ; either way, whatever comes out is bound to "new-coll"
            (prn (str "new-coll: " new-coll))
            new-coll) ; current new-coll
@@ -2761,7 +2761,9 @@ this map is the first item in your new collection
       result)))
 ;; => ({1 3, 3 0} {1 2, 3 0} {1 1, 3 0} {1 0, 3 0})
 
-(defn inc-range-for-key
+;; make a loop that creates a collection of maps where each of a specific key is incremented until it exceeds the target value
+
+(defn maps-for-range
   [m r k]
   (loop [remaining (range r)
          result ()]
@@ -2772,8 +2774,26 @@ this map is the first item in your new collection
         (recur (rest remaining) new-coll)
         result))))
 
-(inc-range-for-key {1 0 3 0} 4 1)
+(maps-for-range {1 0 3 0} 4 1)
 ;; => ({1 3, 3 0} {1 2, 3 0} {1 1, 3 0} {1 0, 3 0})
 
+;; make something that walks thru ALL of your keys
+
+(defn walk-thru-all-keys
+  [m]
+  (map (fn [x] (assoc m x 0)) (keys m)))
+
+(walk-thru-all-keys {1 0 3 0})
+;; => ({1 0, 3 0} {1 0, 3 0})
+
+;; go thru all your keys, makes collections of maps, incrementing a key val based on a range.
+
+(defn make-maps-inc-all-keys
+  [m r]
+  (map (fn [k] (maps-for-range m r k)) (keys m)))
+
+(make-maps-inc-all-keys {1 0 3 0} 4)
+;; => (({1 3, 3 0} {1 2, 3 0} {1 1, 3 0} {1 0, 3 0})
+;;     ({1 0, 3 3} {1 0, 3 2} {1 0, 3 1} {1 0, 3 0}))
 
 )

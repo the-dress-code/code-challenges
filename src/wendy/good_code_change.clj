@@ -9,13 +9,22 @@
        (map (fn [coin] [coin 0]))
        (into {})))
 
+
 ; inc a value in a hash map
 
 (defn inc-me
   [m k v]
   (assoc m k (inc v)))
 
-; write a loop recur that processes a collection
+
+; write a fn that creates a collection of maps, where each of a given key is incremented until it exceeds the target value. works on one provided key.
+
+(defn update-key-for-range
+  [m k r] 
+   (map (fn [x] (assoc m k x)) (range r)))
+
+
+; write a loop recur that walks thru a collection. returns same collection.
 
 (defn walk-the-coll
   [coll]
@@ -28,9 +37,9 @@
         result))))
 
 
-; make a loop that can create a collection of maps where each of a specific key is incremented until it exceeds the target value
+;; write a loop that creates a collection of maps, where each of a given key is incremented until it exceeds the target value. works on one provided key.
 
-(defn inc-range-for-key
+(defn maps-for-range
   [m r k]
   (loop [remaining (range r)
          result ()]
@@ -40,3 +49,17 @@
       (if (seq remaining)
         (recur (rest remaining) new-coll)
         result))))
+
+
+;; write a fn that walks thru ALL of your keys. takes a map.
+
+(defn walk-thru-all-keys
+  [m]
+  (map (fn [x] (assoc m x 0)) (keys m)))
+
+
+;; write a fn that walks thru ALL of your keys, makes collections of maps, incrementing a key val based on a range. takes a map and range val.
+
+(defn make-maps-inc-all-keys
+  [m r]
+  (map (fn [k] (maps-for-range m r k)) (keys m)))
