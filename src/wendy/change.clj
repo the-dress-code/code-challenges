@@ -2513,14 +2513,6 @@ engineering - small logicial steps
 ; coinset
 ; range of counts - what do i need for this? a coin from coinset and target
 
-(let [sumpin 5
-      other 2]
-  (* sumpin other))
-
-(loop [some binding
-       other binding]
-  (recur some other))
-
 (defn seed-map
   [coinset]
   (->> coinset
@@ -2731,17 +2723,57 @@ then you need your loop to know which key / val to inc and at what time
 ; make a loop that can create a collection of maps where each of a specific key is incremented until it exceeds the target value
 
 ; given a starter map
-; create a collection of maps
+; make a loop that can create a collection of maps
 ; where a certain key is inc'd once for each map
 ; until that certain key exceeeds the target value
 ; rather when that certain key exceeds the target value, stop making maps.
 
+what do i want to end up with?
 
+({1 1 3 0}
+{1 2 3 0}
+{1 3 3 0}
+{1 4 3 0})
 
+fn takes:
+ starter map 
+ max val
+ key to change
 
+what do i start with?
+;; {1 0 3 0}, the starter map
+;; 4, the max val to assoc
+;; 1, the key to change
 
+so associate the key of 1 of the {1 0 3 0} map with the (first (range 4)) ; more like (first remaining)
+such as: 
+(assoc {1 0 3 0} 1 0)
 
+this map is the first item in your new collection
 
+(loop [remaining (range 4)
+       result ()]
+  (let [count (first remaining)
+        new-map (assoc {1 0 3 0} 1 count)
+        new-coll (conj result new-map)]
+    (if (seq remaining)
+      (recur (rest remaining) new-coll)
+      result)))
+;; => ({1 3, 3 0} {1 2, 3 0} {1 1, 3 0} {1 0, 3 0})
+
+(defn inc-range-for-key
+  [m r k]
+  (loop [remaining (range r)
+         result ()]
+    (let [count (first remaining)
+          new-map (assoc m k count)
+          new-coll (conj result new-map)]
+      (if (seq remaining)
+        (recur (rest remaining) new-coll)
+        result))))
+
+(inc-range-for-key {1 0 3 0} 4 1)
+;; => ({1 3, 3 0} {1 2, 3 0} {1 1, 3 0} {1 0, 3 0})
 
 
 )
