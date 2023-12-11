@@ -2790,10 +2790,31 @@ this map is the first item in your new collection
 
 (defn make-maps-inc-all-keys
   [m r]
-  (map (fn [k] (maps-for-range m r k)) (keys m)))
+  (map (fn [k] 
+         (maps-for-range m r k)) 
+       (keys m)))
 
 (make-maps-inc-all-keys {1 0 3 0} 4)
 ;; => (({1 3, 3 0} {1 2, 3 0} {1 1, 3 0} {1 0, 3 0})
 ;;     ({1 0, 3 3} {1 0, 3 2} {1 0, 3 1} {1 0, 3 0}))
+
+;; eventually, you need to plug in the capability to make a coll of coin-counts from any coin and any target.
+
+(defn coin-counts
+  [target coin]
+  (range (inc (quot target coin))))
+
+(coin-counts 3 1)
+;; => (0 1 2 3)
+
+;; whats next?
+
+;; figure out a way for the next collection of maps to be built on the first collection of maps.
+
+
+
+
+
+
 
 )
