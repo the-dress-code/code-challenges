@@ -2847,7 +2847,7 @@ this map is the first item in your new collection
 (3)
 (2 3)
 
-(defn this-thing
+(defn manual-zero-sums
   [coll]
   (loop [remaining coll
          result []]
@@ -2857,12 +2857,11 @@ this map is the first item in your new collection
         (recur (rest remaining) new-coll)
         (conj (conj result (apply + result)) 0)))))
 
-(this-thing [2 3])
-;; => [2 3 5 0]
+; success but dirty inclusion of zero
 
 ; try again:
 
-(defn that-thing
+(defn sums-of-subsets
   [coll]
   (loop [remaining coll
          result []]
@@ -2878,19 +2877,83 @@ _ (prn (str "new-coll: " new-coll))]
         (recur (rest remaining) new-coll)
         (conj result (apply + result))))))
 
-(that-thing [2 3])
-;; => [0 2 3 5]
+; success
 
 ; that’s not the sums though
 
 ;; can you make it return the subsets first? (you will see your error)
 
+(defn return-subsets
+  [coll]
+  (loop [remaining coll
+         result []]
+    (let [item (first remaining)
+_ (prn (str "item: " item))
+          subset (conj [] item)
+_ (prn (str "subset: " subset))
+          zero (apply + result)
+_ (prn (str "zero: " zero))
+          final-coll (if (zero? zero)
+                      (conj result (conj [] zero))
+                      (conj result subset))
+_ (prn (str "final-coll: " final-coll))]
+      (if (seq remaining)
+        (recur (rest remaining) final-coll)
+        result))))
+
+(return-subsets [2 3])
+;; => Execution error (ClassCastException) at java.lang.Class/cast (Class.java:3606).
+;;    Cannot cast clojure.lang.PersistentVector to java.lang.Number
+
+(conj [] 2)
+;; => [2]
+
+(conj [[0]] [2])
+;; => [[0] [2]]
+
+(if (zero? 0)
+   (conj [] (conj () 0))
+   (conj [] (2)))
+;; => [(0)]
+
+
+(if (zero? 3)
+   (conj [] (conj () 0))
+   (conj [] '(2)))
+;; => [(2)]
+
+(if (zero? 0)
+ (conj [] (conj [] 0))
+ (conj [] [2]))
+;; => [[0]]
+
+(if (zero? 3)
+ (conj [] (conj [] 0))
+ (conj [] [2]))
+;; => [[2]]
 
 
 
 
 
+(apply + [])
+;; => 0
 
+(conj () 0)
+;; => (0)
+
+apply + result = 0
+put 0 in ()
+
+x [2 3]
+x pick up first of remaining = 2
+x put 2 in a coll (conj () 2) = (2)
+x call (2) a subset
+put subset in final coll
+
+
+
+(conj () 2)
 
 
 
