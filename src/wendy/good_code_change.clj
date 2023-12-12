@@ -72,13 +72,8 @@
 
 ;; write a fn that walks thru ALL of your keys, makes collections of maps, incrementing a key val based on a range. takes a map and range val.
 
-
 (defn make-maps-inc-all-keys
   [m r]
   (map (fn [k] 
          (maps-for-range m r k)) 
        (keys m)))
-
-
-
-

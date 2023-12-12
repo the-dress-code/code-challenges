@@ -2647,7 +2647,6 @@ engineering - small logicial steps
 
 (defn mapify-thru
   [coinset r]
-
   (loop [coins-remaining coinset
          starter-map (seed-map coinset)
          result []]
@@ -2765,8 +2764,8 @@ this map is the first item in your new collection
 
 (defn maps-for-range
   [m r k]
-  (loop [remaining (range r)
-         result ()]
+  (loop [remaining (range r) 
+         result ()] 
     (let [count (first remaining)
           new-map (assoc m k count)
           new-coll (conj result new-map)]
@@ -2798,23 +2797,54 @@ this map is the first item in your new collection
 ;; => (({1 3, 3 0} {1 2, 3 0} {1 1, 3 0} {1 0, 3 0})
 ;;     ({1 0, 3 3} {1 0, 3 2} {1 0, 3 1} {1 0, 3 0}))
 
-;; eventually, you need to plug in the capability to make a coll of coin-counts from any coin and any target.
+;; what are we missing?
 
-(defn coin-counts
-  [target coin]
-  (range (inc (quot target coin))))
+;; the first key's vals used in subsequent collections of maps
 
-(coin-counts 3 1)
-;; => (0 1 2 3)
+;; when you map again with the next key, map over the first collection of maps and assoc new vals and put those maps in the result..
 
-;; whats next?
+;; try this:
 
-;; figure out a way for the next collection of maps to be built on the first collection of maps.
+;; go thru a collection of [ 1 2 3]
+;; when you hit 1, i dunno, do stuff
+
+(defn something-again
+  [collection]
+  (loop [remaining collection
+         result ()]
+    (let [item (first remaining)
+          mapmap (if (= 2 item)
+                   {item "2 item"}
+                   {item "item"})
+          new-coll (conj result mapmap)]
+      (if (seq remaining)
+        (recur (rest remaining) new-coll)
+        result))))
+
+(something-again [1 2 3])
+;; => ({3 "item"} {2 "2 item"} {1 "item"})
 
 
+(defn something
+  [collection]
+  (loop [remaining collection
+         result ()]
+    (let [item (first remaining)
+          mapmap (if (= 2 item)
+                   (something result)
+                   {item "item"})
+          new-coll (conj result mapmap)]
+      (if (seq remaining)
+        (recur (rest remaining) new-coll)
+        result))))
 
-
-
+(something [1 2 3 4 5 6])
+;; => ({6 "item"}
+;;     {5 "item"}
+;;     {4 "item"}
+;;     {3 "item"}
+;;     ({{1 "item"} "item"})
+;;     {1 "item"})
 
 
 )
