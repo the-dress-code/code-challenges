@@ -2727,18 +2727,6 @@ then you need your loop to know which key / val to inc and at what time
 ; until that certain key exceeeds the target value
 ; rather when that certain key exceeds the target value, stop making maps.
 
-what do i want to end up with?
-
-({1 1 3 0}
-{1 2 3 0}
-{1 3 3 0}
-{1 4 3 0})
-
-fn takes:
- starter map 
- max val
- key to change
-
 what do i start with?
 ;; {1 0 3 0}, the starter map
 ;; 4, the max val to assoc
@@ -2845,6 +2833,37 @@ this map is the first item in your new collection
 ;;     {3 "item"}
 ;;     ({{1 "item"} "item"})
 ;;     {1 "item"})
+
+
+;; Given an array of integers, print sums of all subsets in it. Output sums can be printed in any order.
+
+;; input: [2 3]
+;; output: 0 2 3 5
+
+; what are all the subsets?
+
+(0)
+(2)
+(3)
+(2 3)
+
+(defn this-thing
+  [coll]
+  (loop [remaining coll
+         result []]
+    (let [primero (first remaining)
+          new-coll (conj result primero)]
+      (if (seq remaining)
+        (recur (rest remaining) new-coll)
+        (println (conj (conj result (apply + result)) 0))))))
+
+(this-thing [2 3])
+;; => nil
+
+
+
+
+
 
 
 )
