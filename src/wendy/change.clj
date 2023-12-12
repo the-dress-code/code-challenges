@@ -2961,7 +2961,7 @@ _ (prn (str "final-coll: " final-coll))]
  [8]
  [5 6 7 8]]
 
-; or 
+; or would these subsets be assembled more in this order?
 
 [[5]
  [5 6]
