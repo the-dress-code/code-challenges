@@ -2855,10 +2855,42 @@ this map is the first item in your new collection
           new-coll (conj result primero)]
       (if (seq remaining)
         (recur (rest remaining) new-coll)
-        (println (conj (conj result (apply + result)) 0))))))
+        (conj (conj result (apply + result)) 0)))))
 
 (this-thing [2 3])
-;; => nil
+;; => [2 3 5 0]
+
+; try again:
+
+(defn that-thing
+  [coll]
+  (loop [remaining coll
+         result []]
+    (let [item (first remaining)
+_ (prn (str "item: " item))
+          sum (apply + result)
+- (prn (str "sum: " sum))
+          new-coll (if (zero? sum)
+                     (conj result sum item)
+                     (conj result item))
+_ (prn (str "new-coll: " new-coll))]
+      (if (seq remaining)
+        (recur (rest remaining) new-coll)
+        (conj result (apply + result))))))
+
+(that-thing [2 3])
+;; => [0 2 3 5]
+
+; that’s not the sums though
+
+;; can you make it return the subsets first? (you will see your error)
+
+
+
+
+
+
+
 
 
 
