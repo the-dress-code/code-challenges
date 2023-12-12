@@ -2901,64 +2901,24 @@ _ (prn (str "final-coll: " final-coll))]
         (recur (rest remaining) final-coll)
         result))))
 
+;; this is expecting a number somewhere and its being given a vector
+
 (return-subsets [2 3])
 ;; => Execution error (ClassCastException) at java.lang.Class/cast (Class.java:3606).
 ;;    Cannot cast clojure.lang.PersistentVector to java.lang.Number
 
-(conj [] 2)
-;; => [2]
+(defn return-items-in-colls
+  [coll]
+  (loop [remaining coll
+         result []]
+    (let [item (first remaining)
+          subset (conj [] item)
+          final-coll (conj result subset)]
+      (if (seq remaining)
+        (recur (rest remaining) final-coll)
+        result))))
 
-(conj [[0]] [2])
-;; => [[0] [2]]
-
-(if (zero? 0)
-   (conj [] (conj () 0))
-   (conj [] (2)))
-;; => [(0)]
-
-
-(if (zero? 3)
-   (conj [] (conj () 0))
-   (conj [] '(2)))
-;; => [(2)]
-
-(if (zero? 0)
- (conj [] (conj [] 0))
- (conj [] [2]))
-;; => [[0]]
-
-(if (zero? 3)
- (conj [] (conj [] 0))
- (conj [] [2]))
-;; => [[2]]
-
-
-
-
-
-(apply + [])
-;; => 0
-
-(conj () 0)
-;; => (0)
-
-apply + result = 0
-put 0 in ()
-
-x [2 3]
-x pick up first of remaining = 2
-x put 2 in a coll (conj () 2) = (2)
-x call (2) a subset
-put subset in final coll
-
-
-
-(conj () 2)
-
-
-
-
-
-
+(return-items-in-colls [2 3])
+;; => [[2] [3]]
 
 )
