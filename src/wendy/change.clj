@@ -2877,6 +2877,9 @@ _ (prn (str "new-coll: " new-coll))]
         (recur (rest remaining) new-coll)
         (conj result (apply + result))))))
 
+(sums-of-subsets [2 3])
+;; => [0 2 3 5]
+
 ; success
 
 ; that’s not the sums though
@@ -2918,7 +2921,63 @@ _ (prn (str "final-coll: " final-coll))]
         (recur (rest remaining) final-coll)
         result))))
 
-(return-items-in-colls [2 3])
-;; => [[2] [3]]
+(return-items-in-colls [2 3 4 5 6])
+;; => [[2] [3] [4] [5] [6]]
+
+;; what is next? create all possible combinations of the items in original vector.
+
+; note: 0 is a sum, not a subset
+
+[2 3 4]
+
+[[]
+ [2]
+ [2 3]
+ [2 4]
+ [3]
+ ; [3 2] no bc its to the left
+ [3 4]
+ [4]
+; [4 2] no bc its to the left
+; [4 3] no bc its to the left
+ [2 3 4]] ; the original collection
+
+
+[5 6 7 8]
+
+[[5]
+ [5 6]
+ [5 7]
+ [5 8]
+ [5 6 7]
+ [5 6 8]
+ [5 7 8]
+ [6]
+ [6 7]
+ [6 8]
+ [6 7 8]
+ [7]
+ [7 8]
+ [8]
+ [5 6 7 8]]
+
+; or 
+
+[[5]
+ [5 6]
+ [5 6 7]
+ [5 6 8]
+ [5 6 7 8]
+ [5 7]
+ [5 7 8]
+ [5 8]
+ [6]
+ [6 7]
+ [6 7 8]
+ [6 8]
+ [7]
+ [7 8]
+ [8]]
+
 
 )
