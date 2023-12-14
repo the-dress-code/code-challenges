@@ -2904,11 +2904,10 @@ _ (prn (str "final-coll: " final-coll))]
         (recur (rest remaining) final-coll)
         result))))
 
-;; this is expecting a number somewhere and its being given a vector
-
 (return-subsets [2 3])
 ;; => Execution error (ClassCastException) at java.lang.Class/cast (Class.java:3606).
 ;;    Cannot cast clojure.lang.PersistentVector to java.lang.Number
+;;  OOPS ;; this is expecting a number somewhere and its being given a vector
 
 (defn return-items-in-colls
   [coll]
@@ -2930,18 +2929,29 @@ _ (prn (str "final-coll: " final-coll))]
 
 [2 3 4]
 
-[[]
- [2]
- [2 3]
- [2 4]
+[[] ; get the starting result which is []
+ [2] ;  get first item from remaining, and put item in []. conj to final result.
+ [2 3] ; take the first item and  next item from remaining, and put both in []. conj to final result.
+ [2 3 4] ; get the first item, next item, next item, and put in []. conj to final result
+ [2 4] ; since remaining is empty, start over with first item from remaining 
  [3]
- ; [3 2] no bc its to the left
  [3 4]
- [4]
-; [4 2] no bc its to the left
-; [4 3] no bc its to the left
- [2 3 4]] ; the original collection
+ [4]]
 
+
+(map vector [2 3 4])
+;; => ([2] [3] [4])
+
+(map )
+
+(reduce f coll)
+
+(reduce f val coll)
+
+(reduce (fn [acc nxt] 
+          (conj acc nxt))
+        []
+        [2 3 4])
 
 [5 6 7 8]
 
@@ -2963,20 +2973,199 @@ _ (prn (str "final-coll: " final-coll))]
 
 ; or would these subsets be assembled more in this order?
 
-[[5]
- [5 6]
- [5 6 7]
- [5 6 8]
- [5 6 7 8]
- [5 7]
+[[5] ; first of coll
+ [5 6] ; first, second of coll (new subset to conj to?)
+ [5 6 7] ; first, second, third of coll (conj 
+ [5 6 7 8] ; first, second, thir fourth of coll (original coll is now empty)
+ [5 6 8] ; first, second, fourth of coll
+ [5 7] ; first, third of coll
  [5 7 8]
  [5 8]
- [6]
+
+ [6] ; how to branch to 6
  [6 7]
  [6 7 8]
  [6 8]
  [7]
  [7 8]
  [8]]
+
+; u can use just recursion
+
+; look for the pattern
+
+[5 6 7 8]
+lets call [5 6 7 8] remaining
+
+what would first time thru look like?
+
+(first remaining) => 5
+conj [] 5 => [5] 
+[5] => subset
+(conj subset final-coll)
+recur (rest remaining) subset
+
+what would next time thru look like?
+
+(defn subset-time
+  [coll]
+  (loop [remaining coll
+         result []]
+    (let [item (first remaining)
+          subset (conj [] item)
+          in-between (if (seq remaining)
+                       (conj result subset)
+                       subset)]
+      (if (seq remaining)
+        (recur (rest remaining) in-between)
+        result))))
+
+(subset-time [5 6 7 8])
+;; => [[5] [6] [7] [8]]
+
+(defn subset-time
+  [coll]
+  (loop [remaining coll
+         result []]
+    (let [branch-item (first remaining)
+          node-item (first (next remaining))
+          branch-subset (conj [] branch-item)
+          node-subset (conj branch-subset node)
+          in-between (if (seq remaining)
+                       (conj ___ ___)
+                       (conj result subset))]
+      (if (seq remaining)
+        (recur (rest remaining) in-between)
+        result))))
+
+; hmm i see a pattern. maybe this fn can call itself to achieve results.
+; abandon and try again
+
+; what do i need to keep track of?
+
+the initial collection
+the result im building
+items i've already worked thru?
+
+(defn subset-time
+  [coll]
+(println "subset-time")
+  (loop [remaining coll
+         result []]
+    (let [first (first remaining)
+          _ (prn (str "first: " first))
+          _ (prn (str "result: " result))
+          rest (rest remaining)
+          _ (prn (str "rest: " rest ))
+          subset (conj [] first) ; maybe [] changes...
+          _ (prn (str "subset: " subset))
+          final-coll (if (seq rest)
+                       (conj (subset-time rest) subset)
+                       (conj result subset))
+          _ (prn (str "final-coll: " final-coll))]
+      (if (seq remaining)
+        (recur rest final-coll)
+        result))))
+
+(subset-time [5 6 7 8])
+;; => [[8] [7] [8]]
+; closest so far
+
+; if theres stuff in (rest remaining)
+  ; get first of (rest remaining), conj it to orig subset (new subset), conj new subset to result
+
+; otherwise, (conj result subset)
+
+
+(defn subset-time-again
+  [coll]
+  (println)
+  (loop [remaining coll
+         result []]
+    (let [first (first remaining)
+          _ (prn (str "first: " first))
+          _ (prn (str "result: " result))
+          rest (rest remaining)
+          _ (prn (str "rest: " rest ))
+          subset (conj [] first) ; maybe [] changes...
+          _ (prn (str "subset: " subset))
+          final-coll (if (seq rest)
+                       (conj (subset-time rest) (conj result subset))
+                       (conj result subset))
+          _ (prn (str "final-coll: " final-coll))]
+      (if (seq remaining)
+        (recur rest final-coll)
+        result))))
+
+(subset-time-again [5 6 7 8])
+;; dont run this for goodness sakes
+;; 15,000 lines and counting....
+
+
+(println "------------ START OVER -------------")
+
+(defn subset-maker
+  [coll]
+  (println "subset-maker")
+  (loop [remaining coll
+         result []]
+    (let [_ (println "remaining: " remaining)
+          _ (println (str "result: " result))
+          first (first remaining)
+          _ (println (str "first: " first))
+          rest (rest remaining)
+          _ (println (str "rest: " rest))
+          subset (conj [] first) ; maybe [] changes...
+          _ (println (str "subset: " subset))
+          new-coll (conj result subset)
+          _ (println (str "new-coll: " new-coll))]
+      (if (seq remaining)
+        (recur rest new-coll)
+        (do (println "result: " result)
+            result)))))
+
+(subset-maker [5 6 7 8])
+
+(println "------------ START OVER -------------")
+
+(defn subset-machine
+  [coll]
+  (println "subset-machine")
+  (loop [remaining coll
+         result []]
+    (if (seq remaining)
+      (let [_ (println "remaining: " remaining)
+            _ (println (str "result: " result))
+            first (first remaining)
+            _ (println (str "first: " first))
+            rest (rest remaining)
+            _ (println (str "rest: " rest))
+            subset (conj [] first) ; maybe [] changes...
+            _ (println (str "subset: " subset))
+            new-coll (conj result subset)
+            _ (println (str "new-coll: " new-coll))]
+        (recur 
+         (do (println "rest: " rest)
+             rest) 
+         (do (println "new-coll:" new-coll)
+             new-coll)))
+      (do (println "result: " result)
+          result))))
+
+
+(subset-machine [5 6 7 8])
+
+
+
+
+
+
+
+
+
+
+; think of the machine that can do this
+
+; 
 
 )
