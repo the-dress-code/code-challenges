@@ -2812,7 +2812,7 @@ this map is the first item in your new collection
 (something-again [1 2 3])
 ;; => ({3 "item"} {2 "2 item"} {1 "item"})
 
-
+o
 (defn something
   [collection]
   (loop [remaining collection
@@ -3076,6 +3076,8 @@ items i've already worked thru?
 
 ; otherwise, (conj result subset)
 
+; think of the machine that can do this
+
 
 (defn subset-time-again
   [coll]
@@ -3099,7 +3101,7 @@ items i've already worked thru?
 
 (subset-time-again [5 6 7 8])
 ;; dont run this for goodness sakes
-;; 15,000 lines and counting....
+;; repl 15,000 lines and counting....
 
 
 (println "------------ START OVER -------------")
@@ -3156,6 +3158,113 @@ items i've already worked thru?
 (subset-machine [5 6 7 8])
 
 
+;;;;;; FIBONACCI 12/21/23
+
+; n is addition of prev 2
+; nth position is the sum of the 2 previous positions 
+
+[0 1]
+
+fibonacci: [0 1 1 2 3 5 8 13... ]
+index:      0 1 2 3 4 5 6 7
+
+(defn fib
+  [x]
+  (if (zero? x)
+    x
+    (if (= x 1)
+      x
+      (+ (fib (- x 1)) (fib (- x 2))))))
+
+(map fib (range 10))
+;; => (0 1 1 2 3 5 8 13 21 34)
+
+(fib 6)
+;; => 8
+
+
+;;;;;;;;;;;;; powerset
+
+[] , ([])
+; the base case - no recur no mas!
+
+[1] , ([] [1])
+
+[1 2] , ([] [1] [2] [1 2])
+
+[1 2 3] , ([] [1] [2] [1 2] [3] [1 3] [2 3] [1 2 3])
+
+; powerset of 1 2 3 is powerset of 1 2, plus the powerset of 1 2 with the last item (3) added to each subset.
+; base case: when coll is empty
+
+[1 2 3 4] , ([] [1] [2] [1 2] [3] [1 3] [2 3] [1 2 3] [4] [1 4] [2 4] [1 2 4] [3 4] [1 3 4] [2 3 4] [1 2 3 4])
+
+[] [1] [2] [1 2]
+
+
+(defn powerset-w ;; powerset of coll is...
+  [coll]
+  (if (seq coll)
+    (let [inner-dude (powerset-w (butlast coll))]
+      (concat 
+       inner-dude
+       (map 
+        (fn [x] (conj x (last coll)))
+        inner-dude))) 
+    [[]]))
+
+
+(defn powerset-t
+  [coll]
+  (if (seq coll)
+    (let [inner-dude (powerset-t (rest coll))]
+      (concat 
+       inner-dude
+       (map 
+        (fn [x] (conj x (first coll)))
+        inner-dude))) 
+    [(sorted-set)]))
+
+(sort-by vec (powerset-t ["a" "b" "c"]))
+;; => (#{}
+;;     #{"a"}
+;;     #{"b"}
+;;     #{"c"}
+;;     #{"a" "b"}
+;;     #{"a" "c"}
+;;     #{"b" "c"}
+;;     #{"a" "b" "c"})
+
+
+(powerset-w [1 2 3])
+;; => ([] [1] [2] [1 2] [3] [1 3] [2 3] [1 2 3])
+
+; powerset of coll is [A: powerset of the coll without the last item], 
+; concat'd with the [B: powerset of the coll without the last item 
+; WITH the last item added to each subset].
+
+
+
+; approach make-change with similar
+
+target 10
+coinset [3 4]
+
+try each number from coinset
+if number goes into target, 
+  subtract number from target and recur with new target
+  try next number from coinset
+
+base caseses:
+target is empty or zero
+
+
+(defn this-function
+  [x coinset]
+  (loop [remaining x
+         result {}]
+    (let [item (first coinset)]
+      (if stuff))))
 
 
 
@@ -3164,8 +3273,10 @@ items i've already worked thru?
 
 
 
-; think of the machine that can do this
 
-; 
+
+
+
+
 
 )
