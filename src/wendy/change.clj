@@ -3239,6 +3239,24 @@ index:      0 1 2 3 4 5 6 7
 (powerset-w [1 2 3])
 ;; => ([] [1] [2] [1 2] [3] [1 3] [2 3] [1 2 3])
 
+(powerset-w [1 2 3 4])
+;; => ([]
+;;     [1]
+;;     [2]
+;;     [1 2]
+;;     [3]
+;;     [1 3]
+;;     [2 3]
+;;     [1 2 3]
+;;     [4]
+;;     [1 4]
+;;     [2 4]
+;;     [1 2 4]
+;;     [3 4]
+;;     [1 3 4]
+;;     [2 3 4]
+;;     [1 2 3 4])
+
 ; powerset of coll is [A: powerset of the coll without the last item], 
 ; concat'd with the [B: powerset of the coll without the last item 
 ; WITH the last item added to each subset].
