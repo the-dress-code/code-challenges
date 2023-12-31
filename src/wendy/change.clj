@@ -3202,28 +3202,30 @@ index:      0 1 2 3 4 5 6 7
 [] [1] [2] [1 2]
 
 
-(defn powerset-w ;; powerset of coll is...
-  [coll]
-  (if (seq coll)
-    (let [inner-dude (powerset-w (butlast coll))]
-      (concat 
-       inner-dude
-       (map 
-        (fn [x] (conj x (last coll)))
-        inner-dude))) 
-    [[]]))
+(defn powerset-w
+  [coll] ;; takes a collection (coll)
+  (if (seq coll) ;; if coll contains items
+    (let [inner-dude (powerset-w (butlast coll))] ;; let inner-dude represent the powerset of "coll without its last item"
+      (concat ;; concatenate the following collections:
+       inner-dude ;; coll-1: the powerset of "coll without its last item"
+       (map ;; coll-2: apply the anon-f to each item in the below collection
+        (fn [x] (conj x (last coll))) ;; conj x with the "last item of coll"
+                                      ;; x will be each item from the collection provided for map.
+        inner-dude))) ;; inner-dude is the collection for map above
+    [[]])) ;; if coll does not contain items, return [[]]
 
 
 (defn powerset-t
-  [coll]
-  (if (seq coll)
-    (let [inner-dude (powerset-t (rest coll))]
-      (concat 
-       inner-dude
-       (map 
-        (fn [x] (conj x (first coll)))
-        inner-dude))) 
-    [(sorted-set)]))
+  [coll] ;; takes one argument (coll)
+  (if (seq coll) ;; if coll contains items
+    (let [inner-dude (powerset-t (rest coll))] ; bind the powerset of (rest coll) to the symbol inner-dude
+      (concat ;; concatenate the following collections:
+       inner-dude ;; coll-1: the powerset of (rest coll)
+       (map ;; apply the anon-f to each item in the collection below
+        (fn [x] (conj x (first coll))) ;; conj x with the "first item of coll"
+                                       ;; x will be each item in the collection supplied to map
+        inner-dude))) ;; the powerset of (rest coll)
+    [(sorted-set)])) ;; if coll does not contain item, return __________________
 
 (sort-by vec (powerset-t ["a" "b" "c"]))
 ;; => (#{}
