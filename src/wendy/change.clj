@@ -3201,6 +3201,9 @@ index:      0 1 2 3 4 5 6 7
 
 [] [1] [2] [1 2]
 
+; powerset of coll is [A: powerset of the coll without the last item], 
+; concat'd with the [B: powerset of the coll without the last item 
+; WITH the last item added to each subset].
 
 (defn powerset-w
   [coll] ;; takes a collection (coll)
@@ -3213,29 +3216,6 @@ index:      0 1 2 3 4 5 6 7
                                       ;; x will be each item from the collection provided for map.
         inner-dude))) ;; inner-dude is the collection for map above
     [[]])) ;; if coll does not contain items, return [[]]
-
-
-(defn powerset-t
-  [coll] ;; takes one argument (coll)
-  (if (seq coll) ;; if coll contains items
-    (let [inner-dude (powerset-t (rest coll))] ; bind the powerset of (rest coll) to the symbol inner-dude
-      (concat ;; concatenate the following collections:
-       inner-dude ;; coll-1: the powerset of (rest coll)
-       (map ;; apply the anon-f to each item in the collection below
-        (fn [x] (conj x (first coll))) ;; conj x with the "first item of coll"
-                                       ;; x will be each item in the collection supplied to map
-        inner-dude))) ;; the powerset of (rest coll)
-    [(sorted-set)])) ;; if coll does not contain item, return __________________
-
-(sort-by vec (powerset-t ["a" "b" "c"]))
-;; => (#{}
-;;     #{"a"}
-;;     #{"b"}
-;;     #{"c"}
-;;     #{"a" "b"}
-;;     #{"a" "c"}
-;;     #{"b" "c"}
-;;     #{"a" "b" "c"})
 
 
 (powerset-w [1 2 3])
@@ -3259,13 +3239,35 @@ index:      0 1 2 3 4 5 6 7
 ;;     [2 3 4]
 ;;     [1 2 3 4])
 
-; powerset of coll is [A: powerset of the coll without the last item], 
-; concat'd with the [B: powerset of the coll without the last item 
-; WITH the last item added to each subset].
+(defn powerset-t
+  [coll] ;; takes one argument (coll)
+  (if (seq coll) ;; if coll contains items
+    (let [inner-dude (powerset-t (rest coll))] ; bind the powerset of (rest coll) to the symbol inner-dude
+      (concat ;; concatenate the following collections:
+       inner-dude ;; coll-1: the powerset of (rest coll)
+       (map ;; apply the anon-f to each item in the collection below
+        (fn [x] (conj x (first coll))) ;; conj x with the "first item of coll"
+                                       ;; x will be each item in the collection supplied to map
+        inner-dude))) ;; the powerset of (rest coll)
+    [(sorted-set)])) ;; if coll does not contain item, return __________________
+
+;; how does the else clause give us what we want?
+
+(powerset-t ["a" "b" "c"])
+;; answer is same as below, just not sorted
+
+(sort-by vec (powerset-t ["a" "b" "c"]))
+;; => (#{}
+;;     #{"a"}
+;;     #{"b"}
+;;     #{"c"}
+;;     #{"a" "b"}
+;;     #{"a" "c"}
+;;     #{"b" "c"}
+;;     #{"a" "b" "c"})
 
 
-
-; approach make-change with similar
+;;;;;;;;;;;; approach make-change with similar
 
 target 10
 coinset [3 4]
