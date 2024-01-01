@@ -7,14 +7,18 @@
             (let [any-count (rand-int (inc (quot target nxt)))]
               (if (pos? any-count)
                 (assoc acc nxt any-count)
-               acc))) 
+                acc))) 
         {} 
         coin-set))
 
 
 (defn valid?
   [target solution]
-  (= target (apply + (map (fn [[coin count]] (* coin count)) solution))))
+  (= target 
+     (apply + 
+            (map 
+             (fn [[coin count]] (* coin count)) 
+             solution))))
 
 
 (defn make-change
@@ -3288,7 +3292,89 @@ target is empty or zero
     (let [item (first coinset)]
       (if stuff))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; what we keep track of
+; coins used 
+; solution so far
+; target still trying to reach
+; coins remaining 
+
+[1 3 7]
+9
+
+(defn sort-coinset
+  [coinset]
+  (sort > coinset))
+
+(sort-coinset [1 4 2 3])
+;; => (4 3 2 1)
+
+(defn take-3
+ [target sorted-coinset bag-o-coins]
+  
+  (let [coin (first sorted-coinset)
+        quotient (quot target coin)
+        remainder (rem target coin)
+        purse (assoc bag-o-coins coin quotient)]
+    (if (zero? remainder)
+      purse
+      (recur remainder (rest sorted-coinset) purse))))
+
+(take-3 9 [1 3 7] {10 2})
+;; => {10 2, 1 9}
+
+(defn take-2
+  [target coinset]
+  (take-3 target (sort > coinset) {}))
+
+(take-2 29 [ 1 3 7 10])
+;; => {10 2, 7 1, 3 0, 1 2}
+
+; what if we didnt want coins with zero count?
+
+(defn take-3-no-0
+ [target sorted-coinset bag-o-coins]
+  
+  (let [coin (first sorted-coinset)
+        quotient (quot target coin)
+        remainder (rem target coin)
+        purse (if (zero? quotient)
+                bag-o-coins
+                (assoc bag-o-coins coin quotient))]
+    (if (zero? remainder)
+      purse
+      (recur remainder (rest sorted-coinset) purse))))
+
+(defn take-2-no-0
+  [target coinset]
+  (take-3-no-0 target (sort > coinset) {}))
+
+(take-2-no-0 29 [1 3 7 10])
+;; => {10 2, 7 1, 1 2}
+
+(take-2-no-0 6 [1 5 10 25])
+;; => {5 1, 1 1}
+
+(take-2-no-0 19 [20 24])
+;; => Execution error (NullPointerException) at wendy.change/take-3-no-0 (REPL:3340).
+;;    null
+
+;; what if you can't make change with the given coins? 
+;; return "can't make change"
+
+;; what are the conditions that show we can't make change?
+;; if remainder is more than 0 and coinset is empty,
+;; return "can't make change"
+
+(defn one-two-three
+  [target sorted-coinset solution]
+  (let [coin (first sorted-coinset)
+        quotient (quot target coin)
+        remainder (rem target coin)
+        purse (if (zero?))]))
+
+;;;; finish above ^
 
 
 
