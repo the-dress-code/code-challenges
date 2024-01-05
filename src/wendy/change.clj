@@ -1,6 +1,15 @@
 (ns wendy.change
   (:gen-class))
 
+;; Dec 17, 2023 final solution
+
+
+
+;; Nov 6, 2023 randomized solution
+
+;; make maps with random counts for coins, with the count being constrained by (quot target coin).
+;; test to see if the map is a solution for the given coinset and target.
+
 (defn possible-solution
   [target coin-set]
   (reduce (fn [acc nxt]
@@ -3333,7 +3342,7 @@ target is empty or zero
 
 ; what if we didnt want coins with zero count?
 
-(defn take-3-no-0
+(defn take-3
  [target sorted-coinset bag-o-coins]
   
   (let [coin (first sorted-coinset)
@@ -3346,17 +3355,23 @@ target is empty or zero
       purse
       (recur remainder (rest sorted-coinset) purse))))
 
-(defn take-2-no-0
-  [target coinset]
-  (take-3-no-0 target (sort > coinset) {}))
+;; each time recur, 
 
-(take-2-no-0 29 [1 3 7 10])
+(defn make-change
+  [target coinset]
+  (take-3 target (sort > coinset) {}))
+
+(make-change 29 [1 3 7 10])
 ;; => {10 2, 7 1, 1 2}
 
-(take-2-no-0 6 [1 5 10 25])
+(make-change 6 [1 5 10 25])
 ;; => {5 1, 1 1}
 
-(take-2-no-0 19 [20 24])
+(make-change 17 [4 9 14 25]) ; needs to branch
+;; => Execution error (NullPointerException) at wendy.change/take-3 (REPL:3349).
+;;    null
+
+(make-change 19 [20 24])
 ;; => Execution error (NullPointerException) at wendy.change/take-3-no-0 (REPL:3340).
 ;;    null
 
@@ -3365,16 +3380,8 @@ target is empty or zero
 
 ;; what are the conditions that show we can't make change?
 ;; if remainder is more than 0 and coinset is empty,
+
 ;; return "can't make change"
-
-(defn one-two-three
-  [target sorted-coinset solution]
-  (let [coin (first sorted-coinset)
-        quotient (quot target coin)
-        remainder (rem target coin)
-        purse (if (zero?))]))
-
-;;;; finish above ^
 
 
 
